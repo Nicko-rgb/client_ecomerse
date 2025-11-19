@@ -7,8 +7,27 @@ import WelcomeScreen from '../modules/welcome/screens/WelcomeScreen';
 import HomeScreen from '../modules/products/screens/HomeScreen';
 import Producto from '../modules/products/screens/Producto';
 import CartScreen from '../modules/cart/screens/CartScreen';
-import ProfileScreen from '../modules/profile/screens/ProfileScreen';
 import { useCart } from '../context/CartContext';
+
+// Importar todas las pantallas del módulo Profile
+import {
+  ProfileScreen,
+  EditProfileScreen,
+  AddressesScreen,
+  AddAddressScreen,
+  PaymentMethodsScreen,
+  OrderHistoryScreen,
+  SettingsScreen,
+  HelpScreen,
+  TermsScreen,
+} from '../modules/profile';
+
+// Importar pantallas adicionales
+import EditAddressScreen from '../modules/profile/screens/EditAddressScreen';
+import AddPaymentMethodScreen from '../modules/profile/screens/AddPaymentMethodScreen';
+import EditPaymentMethodScreen from '../modules/profile/screens/EditPaymentMethodScreen';
+import OrderDetailsScreen from '../modules/profile/screens/OrderDetailsScreen';
+import ChangePasswordScreen from '../modules/profile/screens/ChangePasswordScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -54,10 +73,89 @@ function MainTabs() {
 }
 
 export default function AppNavigator() {
-    return (
-        <Stack.Navigator>
-            <Stack.Screen name="Bienvenida" component={WelcomeScreen} options={{ headerShown: false }} />
-            <Stack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
-        </Stack.Navigator>
-    );
+  return (
+    <Stack.Navigator
+      screenOptions={{
+        headerStyle: {
+          backgroundColor: '#44C38D',
+        },
+        headerTintColor: '#FFFFFF',
+        headerTitleStyle: {
+          fontWeight: 'bold',
+        },
+      }}
+    >
+      <Stack.Screen name="Bienvenida" component={WelcomeScreen} options={{ headerShown: false }} />
+      <Stack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
+      
+      {/* Pantallas del módulo Profile */}
+      <Stack.Screen 
+        name="EditProfile" 
+        component={EditProfileScreen}
+        options={{ title: 'Editar Perfil' }}
+      />
+      <Stack.Screen 
+        name="AddressesScreen" 
+        component={AddressesScreen}
+        options={{ title: 'Mis Direcciones' }}
+      />
+      <Stack.Screen 
+        name="AddAddressScreen" 
+        component={AddAddressScreen}
+        options={{ title: 'Agregar Dirección' }}
+      />
+      <Stack.Screen 
+        name="PaymentMethodsScreen" 
+        component={PaymentMethodsScreen}
+        options={{ title: 'Métodos de Pago' }}
+      />
+      <Stack.Screen 
+        name="OrderHistoryScreen" 
+        component={OrderHistoryScreen}
+        options={{ title: 'Mis Pedidos' }}
+      />
+      <Stack.Screen 
+        name="SettingsScreen" 
+        component={SettingsScreen}
+        options={{ title: 'Configuración' }}
+      />
+      <Stack.Screen 
+        name="HelpScreen" 
+        component={HelpScreen}
+        options={{ title: 'Ayuda y Soporte' }}
+      />
+      <Stack.Screen 
+        name="TermsScreen" 
+        component={TermsScreen}
+        options={{ title: 'Términos y Condiciones' }}
+      />
+      
+      {/* Pantallas adicionales del perfil */}
+      <Stack.Screen 
+        name="EditAddressScreen" 
+        component={EditAddressScreen}
+        options={{ title: 'Editar Dirección' }}
+      />
+      <Stack.Screen 
+        name="AddPaymentMethodScreen" 
+        component={AddPaymentMethodScreen}
+        options={{ title: 'Agregar Método de Pago' }}
+      />
+      <Stack.Screen 
+        name="EditPaymentMethodScreen" 
+        component={EditPaymentMethodScreen}
+        options={{ title: 'Editar Método de Pago' }}
+      />
+      <Stack.Screen 
+        name="OrderDetailsScreen" 
+        component={OrderDetailsScreen}
+        options={{ title: 'Detalles del Pedido' }}
+      />
+      <Stack.Screen 
+        name="ChangePasswordScreen" 
+        component={ChangePasswordScreen}
+        options={{ title: 'Cambiar Contraseña' }}
+      />
+    </Stack.Navigator>
+  );
 }
