@@ -25,7 +25,12 @@ export default function HomeScreen() {
                 />
             </View>
             {/* Category Chips */}
-            <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.chipsRow} contentContainerStyle={styles.chipsContent}>
+            <ScrollView
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                style={styles.chipsRow}
+                contentContainerStyle={styles.chipsContent}
+            >
                 {categories.map((c) => (
                     <TouchableOpacity
                         key={c}

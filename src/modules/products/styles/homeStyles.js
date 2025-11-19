@@ -27,15 +27,14 @@ export default StyleSheet.create({
         paddingVertical: 10,
         borderWidth: 1,
         borderColor: 'transparent',
+        flexGrow: 0,
     },
     chipsContent: {
         alignItems: 'center',
-        borderWidth: 1,
-        borderColor: 'red',
+        flexGrow: 0,
     },
     chip: {
         paddingHorizontal: 14,
-        paddingVertical: 6,
         borderRadius: 16,
         minHeight: 32,
         alignItems: 'center',
@@ -46,7 +45,6 @@ export default StyleSheet.create({
     },
     chipText: {
         fontSize: 12,
-        lineHeight: 14,
         textAlignVertical: 'center',
         color: colors.primary,
     },
@@ -54,8 +52,6 @@ export default StyleSheet.create({
     // Product Grid
     grid: { 
         paddingBottom: 16,
-        borderWidth: 1,
-        borderColor: 'red',
     },
     cardItem: {
         flex: 1,

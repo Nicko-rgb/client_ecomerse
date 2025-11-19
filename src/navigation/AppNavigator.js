@@ -5,12 +5,23 @@ import { Ionicons } from '@expo/vector-icons';
 import colors from '../theme/colors';
 import WelcomeScreen from '../modules/welcome/screens/WelcomeScreen';
 import HomeScreen from '../modules/products/screens/HomeScreen';
+import Producto from '../modules/products/screens/Producto';
 import CartScreen from '../modules/cart/screens/CartScreen';
 import ProfileScreen from '../modules/profile/screens/ProfileScreen';
 import { useCart } from '../context/CartContext';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
+const ProductsStack = createNativeStackNavigator();
+
+function ProductosStack() {
+  return (
+    <ProductsStack.Navigator screenOptions={{ headerShown: false }}>
+      <ProductsStack.Screen name="HomeProductos" component={HomeScreen} />
+      <ProductsStack.Screen name="Producto" component={Producto} />
+    </ProductsStack.Navigator>
+  );
+}
 
 function MainTabs() {
     const { count } = useCart();
@@ -28,7 +39,7 @@ function MainTabs() {
                 },
             })}
         >
-            <Tab.Screen name="Productos" component={HomeScreen} />
+      <Tab.Screen name="Productos" component={ProductosStack} />
             <Tab.Screen
                 name="Carrito"
                 component={CartScreen}

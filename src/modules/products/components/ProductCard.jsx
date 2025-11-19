@@ -1,13 +1,15 @@
 import React from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '../../../theme/colors';
 import { useCart } from '../../../context/CartContext';
 
 export default function ProductCard({ product }) {
     const { addToCart } = useCart();
+    const navigation = useNavigation();
     return (
-        <View style={{ backgroundColor: colors.card, borderRadius: 12, padding: 10, borderWidth: 1, borderColor: colors.border, flex: 1 }}>
+        <TouchableOpacity activeOpacity={0.9} onPress={() => navigation.navigate('Producto', { product })} style={{ backgroundColor: colors.card, borderRadius: 12, padding: 10, borderWidth: 1, borderColor: colors.border, flex: 1 }}>
             <Image source={{ uri: product.image }} style={{ width: '100%', height: 110, borderRadius: 10 }} resizeMode="cover" />
             <Text style={{ marginTop: 8, fontWeight: '700', color: colors.text }}>{product.title}</Text>
             <Text style={{ marginTop: 4, fontWeight: '700', color: colors.text }}>$ {product.price.toFixed(2)}</Text>
@@ -27,6 +29,6 @@ export default function ProductCard({ product }) {
                     <Text style={{ textAlign: 'center', color: colors.primary, fontWeight: '700' }}>Add to Cart</Text>
                 </TouchableOpacity>
             </View>
-        </View>
+        </TouchableOpacity>
     );
 }
