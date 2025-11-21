@@ -1,0 +1,148 @@
+import { StyleSheet } from 'react-native';
+import colors from '../../../theme/colors';
+
+export const checkoutStyles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: colors.bg,
+  },
+  section: {
+    padding: 16,
+  },
+  sectionTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
+    marginBottom: 12,
+  },
+  card: {
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 16,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  summaryRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 12,
+  },
+  summaryLabel: {
+    fontSize: 15,
+    color: colors.muted,
+  },
+  summaryValue: {
+    fontSize: 15,
+    fontWeight: '600',
+    color: colors.text,
+  },
+  divider: {
+    height: 1,
+    backgroundColor: colors.border,
+    marginVertical: 12,
+  },
+  totalLabel: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.text,
+  },
+  totalValue: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: colors.primary,
+  },
+  input: {
+    backgroundColor: colors.lightBackground,
+    borderRadius: 10,
+    padding: 14,
+    fontSize: 15,
+    color: colors.text,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    gap: 12,
+  },
+  halfInput: {
+    flex: 1,
+  },
+  paymentMethods: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 16,
+    gap: 12,
+  },
+  paymentOption: {
+    flex: 1,
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+    borderWidth: 2,
+    borderColor: colors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 4,
+    elevation: 2,
+  },
+  paymentOptionActive: {
+    borderColor: colors.primary,
+    backgroundColor: colors.primary + '10',
+  },
+  paymentText: {
+    marginTop: 8,
+    fontSize: 14,
+    fontWeight: '600',
+    color: colors.muted,
+  },
+  paymentTextActive: {
+    color: colors.primary,
+  },
+  infoText: {
+    fontSize: 14,
+    color: colors.muted,
+    textAlign: 'center',
+    lineHeight: 20,
+  },
+  securityInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    gap: 8,
+  },
+  securityText: {
+    fontSize: 13,
+    color: colors.success,
+    fontWeight: '600',
+  },
+  footer: {
+    backgroundColor: colors.white,
+    padding: 16,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: -4 },
+    shadowOpacity: 0.1,
+    shadowRadius: 8,
+    elevation: 10,
+  },
+  placeOrderButton: {
+    backgroundColor: colors.primary,
+    borderRadius: 12,
+    padding: 16,
+    alignItems: 'center',
+  },
+  placeOrderText: {
+    color: colors.white,
+    fontSize: 18,
+    fontWeight: '700',
+  },
+});

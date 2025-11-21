@@ -7,6 +7,7 @@ import WelcomeScreen from '../modules/welcome/screens/WelcomeScreen';
 import HomeScreen from '../modules/products/screens/HomeScreen';
 import Producto from '../modules/products/screens/Producto';
 import CartScreen from '../modules/cart/screens/CartScreen';
+import CheckoutScreen from '../modules/cart/screens/CheckoutScreen';
 import { useCart } from '../context/CartContext';
 
 // Importar todas las pantallas del módulo Profile
@@ -87,6 +88,11 @@ export default function AppNavigator() {
     >
       <Stack.Screen name="Bienvenida" component={WelcomeScreen} options={{ headerShown: false }} />
       <Stack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
+      <Stack.Screen 
+        name="Checkout" 
+        component={CheckoutScreen}
+        options={{ title: 'Finalizar Compra' }}
+      />
       
       {/* Pantallas del módulo Profile */}
       <Stack.Screen 
