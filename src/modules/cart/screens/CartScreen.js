@@ -1,35 +1,84 @@
-import React from 'react';
-import { View, Text, FlatList, TouchableOpacity } from 'react-native';
-import colors from '../../../theme/colors';
+import React, { useState } from 'react';
+import { View, Text, FlatList } from 'react-native';
 import { useCart } from '../../../context/CartContext';
+import CartItem from '../components/CartItem';
+import EmptyCart from '../components/EmptyCart';
+import CartSummary from '../components/CartSummary';
+import ProductDetailModal from '../components/ProductDetailModal';
+import { cartStyles } from '../styles/cartStyles';
 
 export default function CartScreen() {
-  const { items, removeFromCart, clearCart } = useCart();
-  const total = items.reduce((s, p) => s + p.price, 0);
+  const { 
+    items, 
+    removeFromCart, 
+    incrementQuantity, 
+    decrementQuantity,
+    addToCart,
+    clearCart,
+    getSubtotal,
+    getTotalItems
+  } = useCart();
+
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false);
+
+  const subtotal = getSubtotal();
+  const totalItems = getTotalItems();
+
+  const handleProductPress = (product) => {
+    setSelectedProduct(product);
+    setModalVisible(true);
+  };
+
+  const handleCloseModal = () => {
+    setModalVisible(false);
+    setSelectedProduct(null);
+  };
+
+  if (items.length === 0) {
+    return (
+      <View style={cartStyles.container}>
+        <EmptyCart />
+      </View>
+    );
+  }
+
   return (
-    <View style={{ flex: 1, backgroundColor: '#fff' }}>
+    <View style={cartStyles.container}>
+      <View style={cartStyles.header}>
+        <Text style={cartStyles.headerTitle}>Mi Carrito</Text>
+        <Text style={cartStyles.headerSubtitle}>
+          {totalItems} {totalItems === 1 ? 'producto' : 'productos'}
+        </Text>
+      </View>
+
       <FlatList
         data={items}
-        keyExtractor={(_, i) => String(i)}
-        renderItem={({ item, index }) => (
-          <View style={{ padding: 16, borderBottomWidth: 1, borderColor: '#eee', flexDirection: 'row', justifyContent: 'space-between' }}>
-            <Text style={{ fontWeight: '600', color: colors.text }}>{item.title}</Text>
-            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-              <Text style={{ marginRight: 12 }}>$ {item.price.toFixed(2)}</Text>
-              <TouchableOpacity onPress={() => removeFromCart(index)}>
-                <Text style={{ color: colors.primary }}>Quitar</Text>
-              </TouchableOpacity>
-            </View>
-          </View>
+        keyExtractor={(item) => item.id.toString()}
+        contentContainerStyle={cartStyles.listContent}
+        renderItem={({ item }) => (
+          <CartItem
+            item={item}
+            onIncrement={() => incrementQuantity(item.id)}
+            onDecrement={() => decrementQuantity(item.id)}
+            onRemove={() => removeFromCart(item.id)}
+            onPress={() => handleProductPress(item)}
+          />
         )}
-        ListEmptyComponent={<Text style={{ padding: 16 }}>Tu carrito está vacío</Text>}
+        showsVerticalScrollIndicator={false}
       />
-      <View style={{ padding: 16, borderTopWidth: 1, borderColor: '#eee' }}>
-        <Text style={{ fontSize: 18, fontWeight: '700', color: colors.text }}>Total: $ {total.toFixed(2)}</Text>
-        <TouchableOpacity style={{ marginTop: 12, backgroundColor: colors.primary, paddingVertical: 12, borderRadius: 10 }} onPress={clearCart}>
-          <Text style={{ color: '#fff', textAlign: 'center', fontWeight: '700' }}>Proceder al pago</Text>
-        </TouchableOpacity>
-      </View>
+
+      <CartSummary 
+        subtotal={subtotal}
+      />
+
+      <ProductDetailModal
+        visible={modalVisible}
+        product={selectedProduct}
+        onClose={handleCloseModal}
+        onAddToCart={() => selectedProduct && addToCart(selectedProduct)}
+        onRemove={() => selectedProduct && removeFromCart(selectedProduct.id)}
+      />
     </View>
   );
 }
