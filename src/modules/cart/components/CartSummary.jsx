@@ -3,14 +3,18 @@ import { View, Text, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { cartStyles } from '../styles/cartStyles';
 
-export default function CartSummary({ subtotal }) {
+export default function CartSummary({ subtotal, onCheckout }) {
   const navigation = useNavigation();
   const shipping = subtotal > 0 ? 5.00 : 0;
   const tax = subtotal * 0.10; // 10% de impuesto
   const total = subtotal + shipping + tax;
 
   const handleCheckout = () => {
-    navigation.navigate('Checkout');
+    if (onCheckout) {
+      onCheckout();
+    } else {
+      navigation.navigate('Checkout');
+    }
   };
 
   return (

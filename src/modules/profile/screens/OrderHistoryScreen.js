@@ -6,7 +6,9 @@ import {
   TouchableOpacity,
   StyleSheet,
   RefreshControl,
+  ActivityIndicator,
 } from 'react-native';
+import { useOrders } from '../../../hooks/useOrders';
 import { colors } from '../../../theme/colors';
 
 const OrderCard = ({ order, onViewDetails }) => {
@@ -49,18 +51,18 @@ const OrderCard = ({ order, onViewDetails }) => {
       
       <View style={styles.orderItems}>
         <Text style={styles.itemsCount}>
-          {order.items.length} {order.items.length === 1 ? 'producto' : 'productos'}
+          {order.items?.length || 0} {order.items?.length === 1 ? 'producto' : 'productos'}
         </Text>
-        <Text style={styles.orderTotal}>${order.total.toFixed(2)}</Text>
+        <Text style={styles.orderTotal}>${(order.totalAmount || order.total || 0).toFixed(2)}</Text>
       </View>
       
-      {order.items.slice(0, 2).map((item, index) => (
+      {order.items?.slice(0, 2).map((item, index) => (
         <Text key={index} style={styles.itemName}>
-          • {item.name} (x{item.quantity})
+          • {item.product?.name || item.name} (x{item.quantity})
         </Text>
       ))}
       
-      {order.items.length > 2 && (
+      {order.items?.length > 2 && (
         <Text style={styles.moreItems}>
           y {order.items.length - 2} productos más...
         </Text>
@@ -70,53 +72,41 @@ const OrderCard = ({ order, onViewDetails }) => {
 };
 
 const OrderHistoryScreen = ({ navigation }) => {
+  const { orders, loading, error, refreshOrders } = useOrders();
   const [refreshing, setRefreshing] = useState(false);
-  
-  // Datos de ejemplo - en una app real vendrían de una API
-  const [orders] = useState([
-    {
-      id: '12345',
-      status: 'delivered',
-      createdAt: '2024-01-15T10:30:00Z',
-      total: 89.99,
-      items: [
-        { name: 'Camiseta Básica', quantity: 2 },
-        { name: 'Jeans Slim Fit', quantity: 1 }
-      ]
-    },
-    {
-      id: '12344',
-      status: 'shipped',
-      createdAt: '2024-01-10T14:20:00Z',
-      total: 156.50,
-      items: [
-        { name: 'Zapatillas Deportivas', quantity: 1 },
-        { name: 'Calcetines Pack x3', quantity: 1 },
-        { name: 'Gorra Deportiva', quantity: 1 }
-      ]
-    },
-    {
-      id: '12343',
-      status: 'processing',
-      createdAt: '2024-01-08T09:15:00Z',
-      total: 45.00,
-      items: [
-        { name: 'Libro de Programación', quantity: 1 }
-      ]
-    }
-  ]);
 
   const onRefresh = async () => {
     setRefreshing(true);
-    // Simular carga de datos
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 1000);
+    await refreshOrders();
+    setRefreshing(false);
   };
 
   const handleViewOrderDetails = (order) => {
     navigation.navigate('OrderDetailsScreen', { order });
   };
+
+  if (loading && !refreshing) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={{ marginTop: 12, color: colors.gray }}>Cargando pedidos...</Text>
+      </View>
+    );
+  }
+
+  if (error) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center', padding: 20 }]}>
+        <Text style={{ color: colors.error, textAlign: 'center' }}>Error: {error}</Text>
+        <TouchableOpacity 
+          style={styles.emptyButton}
+          onPress={refreshOrders}
+        >
+          <Text style={styles.emptyButtonText}>Reintentar</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

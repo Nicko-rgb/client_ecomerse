@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList } from 'react-native';
+import { View, Text, FlatList, Alert } from 'react-native';
 import { useCart } from '../../../context/CartContext';
+import { useAuth } from '../../../context/AuthContext';
 import CartItem from '../components/CartItem';
 import EmptyCart from '../components/EmptyCart';
 import CartSummary from '../components/CartSummary';
 import ProductDetailModal from '../components/ProductDetailModal';
 import { cartStyles } from '../styles/cartStyles';
 
-export default function CartScreen() {
+export default function CartScreen({ navigation }) {
+  const { isAuthenticated } = useAuth();
   const { 
     items, 
     removeFromCart, 
@@ -33,6 +35,26 @@ export default function CartScreen() {
   const handleCloseModal = () => {
     setModalVisible(false);
     setSelectedProduct(null);
+  };
+
+  const handleCheckout = () => {
+    if (!isAuthenticated) {
+      Alert.alert(
+        'Iniciar Sesión',
+        'Debes iniciar sesión para continuar con la compra',
+        [
+          { text: 'Cancelar', style: 'cancel' },
+          { 
+            text: 'Iniciar Sesión', 
+            onPress: () => navigation.navigate('LoginScreen')
+          }
+        ]
+      );
+      return;
+    }
+
+    // Continuar con el checkout
+    navigation.navigate('Checkout');
   };
 
   if (items.length === 0) {
@@ -70,6 +92,7 @@ export default function CartScreen() {
 
       <CartSummary 
         subtotal={subtotal}
+        onCheckout={handleCheckout}
       />
 
       <ProductDetailModal
