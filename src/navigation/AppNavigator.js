@@ -23,12 +23,28 @@ import {
   TermsScreen,
 } from '../modules/profile';
 
-// Importar pantallas adicionales
+// Importar pantallas adicionales del perfil
 import EditAddressScreen from '../modules/profile/screens/EditAddressScreen';
 import AddPaymentMethodScreen from '../modules/profile/screens/AddPaymentMethodScreen';
 import EditPaymentMethodScreen from '../modules/profile/screens/EditPaymentMethodScreen';
 import OrderDetailsScreen from '../modules/profile/screens/OrderDetailsScreen';
 import ChangePasswordScreen from '../modules/profile/screens/ChangePasswordScreen';
+
+// Importar pantallas del módulo Admin
+import {
+  AdminDashboardScreen,
+  AdminProductsScreen,
+  AdminCreateProductScreen,
+  AdminEditProductScreen,
+  AdminOrdersScreen,
+  AdminOrderDetailsScreen,
+  AdminUsersScreen,
+  AdminUserDetailsScreen,
+} from '../modules/admin';
+
+// Importar pantallas de autenticación
+import LoginScreen from '../modules/auth/screens/LoginScreen';
+import RegisterScreen from '../modules/auth/screens/RegisterScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -161,6 +177,67 @@ export default function AppNavigator() {
         name="ChangePasswordScreen" 
         component={ChangePasswordScreen}
         options={{ title: 'Cambiar Contraseña' }}
+      />
+      
+      {/* Pantallas del módulo Admin */}
+      <Stack.Screen 
+        name="AdminDashboardScreen" 
+        component={AdminDashboardScreen}
+        options={{ title: 'Dashboard Admin' }}
+      />
+      <Stack.Screen 
+        name="AdminProductsScreen" 
+        component={AdminProductsScreen}
+        options={{ title: 'Gestión de Productos' }}
+      />
+      <Stack.Screen 
+        name="AdminCreateProductScreen" 
+        component={AdminCreateProductScreen}
+        options={{ title: 'Crear Producto' }}
+      />
+      <Stack.Screen 
+        name="AdminEditProductScreen" 
+        component={AdminEditProductScreen}
+        options={{ title: 'Editar Producto' }}
+      />
+      <Stack.Screen 
+        name="AdminOrdersScreen" 
+        component={AdminOrdersScreen}
+        options={{ title: 'Gestión de Pedidos' }}
+      />
+      <Stack.Screen 
+        name="AdminOrderDetailsScreen" 
+        component={AdminOrderDetailsScreen}
+        options={{ title: 'Detalles del Pedido' }}
+      />
+      <Stack.Screen 
+        name="AdminUsersScreen" 
+        component={AdminUsersScreen}
+        options={{ title: 'Gestión de Usuarios' }}
+      />
+      <Stack.Screen 
+        name="AdminUserDetailsScreen" 
+        component={AdminUserDetailsScreen}
+        options={{ title: 'Detalles del Usuario' }}
+      />
+      
+      {/* Pantallas de Autenticación */}
+      <Stack.Screen 
+        name="LoginScreen" 
+        component={LoginScreen}
+        options={{ title: 'Iniciar Sesión', headerShown: false }}
+      />
+      <Stack.Screen 
+        name="RegisterScreen" 
+        component={RegisterScreen}
+        options={{ title: 'Crear Cuenta' }}
+      />
+      
+      {/* Pantalla de Privacidad */}
+      <Stack.Screen 
+        name="PrivacySettingsScreen" 
+        component={require('../modules/profile/screens/PrivacySettingsScreen').default}
+        options={{ title: 'Privacidad y Datos' }}
       />
     </Stack.Navigator>
   );

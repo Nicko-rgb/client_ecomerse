@@ -10,10 +10,12 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useProfile } from '../hooks/useProfile';
+import { useAuth } from '../../../context/AuthContext';
 import { colors } from '../../../theme/colors';
 
 const EditProfileScreen = ({ navigation, route }) => {
   const { profile, updateProfile, loading } = useProfile();
+  const { user, updateUser } = useAuth();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -58,6 +60,16 @@ const EditProfileScreen = ({ navigation, route }) => {
     const result = await updateProfile(formData);
     
     if (result.success) {
+      // Actualizar también el contexto de autenticación
+      const updatedUser = {
+        ...user,
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: formData.phone,
+      };
+      await updateUser(updatedUser);
+      
       Alert.alert('Éxito', 'Perfil actualizado correctamente', [
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);

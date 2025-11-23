@@ -9,9 +9,13 @@ import {
   Alert,
   ActivityIndicator,
 } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import API_CONFIG from '../../../config/api';
+import { useAuth } from '../../../context/AuthContext';
 import { colors } from '../../../theme/colors';
 
 const ChangePasswordScreen = ({ navigation }) => {
+  const { logout } = useAuth();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     currentPassword: '',
@@ -90,23 +94,41 @@ const ChangePasswordScreen = ({ navigation }) => {
     setLoading(true);
     
     try {
-      // Simular cambio de contraseña
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const token = await AsyncStorage.getItem('token');
       
-      Alert.alert(
-        'Éxito', 
-        'Contraseña cambiada correctamente. Por seguridad, deberás iniciar sesión nuevamente.',
-        [
-          { 
-            text: 'OK', 
-            onPress: () => {
-              // Aquí iría la lógica de logout
-              navigation.navigate('MainTabs');
+      const response = await fetch(`${API_CONFIG.BASE_URL}/auth/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify({
+          currentPassword: formData.currentPassword,
+          newPassword: formData.newPassword
+        }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        Alert.alert(
+          'Éxito', 
+          'Contraseña cambiada correctamente. Por seguridad, deberás iniciar sesión nuevamente.',
+          [
+            { 
+              text: 'OK', 
+              onPress: async () => {
+                await logout();
+                navigation.navigate('LoginScreen');
+              }
             }
-          }
-        ]
-      );
+          ]
+        );
+      } else {
+        Alert.alert('Error', data.error || 'No se pudo cambiar la contraseña');
+      }
     } catch (error) {
+      console.error('Error changing password:', error);
       Alert.alert('Error', 'No se pudo cambiar la contraseña. Inténtalo de nuevo.');
     } finally {
       setLoading(false);

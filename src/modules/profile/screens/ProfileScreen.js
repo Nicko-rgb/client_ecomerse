@@ -1,18 +1,22 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
   ScrollView, 
   StyleSheet, 
   Alert,
-  RefreshControl 
+  RefreshControl,
+  TouchableOpacity,
+  ActivityIndicator
 } from 'react-native';
 import { useProfile } from '../hooks/useProfile';
+import { useAuth } from '../../../context/AuthContext';
 import ProfileHeader from '../components/ProfileHeader';
 import ProfileMenuItem from '../components/ProfileMenuItem';
 import { colors } from '../../../theme/colors';
 
 const ProfileScreen = ({ navigation }) => {
+  const { isAuthenticated, user, logout, isAdmin } = useAuth();
   const { 
     profile, 
     addresses, 
@@ -23,6 +27,8 @@ const ProfileScreen = ({ navigation }) => {
   } = useProfile();
   
   const [refreshing, setRefreshing] = useState(false);
+
+  // No necesitamos el useEffect con Alert, solo mostramos la pantalla de login
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -56,18 +62,53 @@ const ProfileScreen = ({ navigation }) => {
       '¿Estás seguro de que quieres cerrar sesión?',
       [
         { text: 'Cancelar', style: 'cancel' },
-        { text: 'Cerrar Sesión', style: 'destructive', onPress: () => {
-          // Lógica de logout
-          console.log('Logout');
-        }},
+        { 
+          text: 'Cerrar Sesión', 
+          style: 'destructive', 
+          onPress: async () => {
+            await logout();
+            navigation.navigate('LoginScreen');
+          }
+        },
       ]
     );
   };
+
+  // Mostrar pantalla de login si no está autenticado
+  if (!isAuthenticated) {
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.loginTitle}>🔐</Text>
+        <Text style={styles.loginText}>Inicia sesión para ver tu perfil</Text>
+        <TouchableOpacity 
+          style={styles.loginButton}
+          onPress={() => navigation.navigate('LoginScreen')}
+        >
+          <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
+        </TouchableOpacity>
+      </View>
+    );
+  }
+
+  if (loading) {
+    return (
+      <View style={styles.errorContainer}>
+        <ActivityIndicator size="large" color={colors.primary} />
+        <Text style={styles.loadingText}>Cargando perfil...</Text>
+      </View>
+    );
+  }
 
   if (error) {
     return (
       <View style={styles.errorContainer}>
         <Text style={styles.errorText}>Error: {error}</Text>
+        <TouchableOpacity 
+          style={styles.retryButton}
+          onPress={refreshProfile}
+        >
+          <Text style={styles.retryButtonText}>Reintentar</Text>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -118,6 +159,22 @@ const ProfileScreen = ({ navigation }) => {
         </View>
       </View>
 
+      {/* Solo mostrar Dashboard Admin si es administrador */}
+      {isAdmin && (
+        <View style={styles.menuSection}>
+          <Text style={styles.sectionTitle}>Administración</Text>
+          
+          <View style={styles.menuContainer}>
+            <ProfileMenuItem
+              icon="🎛️"
+              title="Dashboard Admin"
+              subtitle="Panel de administración"
+              onPress={() => navigation.navigate('AdminDashboardScreen')}
+            />
+          </View>
+        </View>
+      )}
+
       <View style={styles.menuSection}>
         <Text style={styles.sectionTitle}>Configuración</Text>
         
@@ -165,11 +222,51 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     padding: 20,
+    backgroundColor: colors.bg,
   },
   errorText: {
     color: colors.error,
     fontSize: 16,
     textAlign: 'center',
+    marginBottom: 16,
+  },
+  loginTitle: {
+    fontSize: 64,
+    marginBottom: 16,
+  },
+  loginText: {
+    fontSize: 18,
+    color: colors.dark,
+    marginBottom: 24,
+    textAlign: 'center',
+  },
+  loginButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 32,
+    paddingVertical: 12,
+    borderRadius: 8,
+  },
+  loginButtonText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  loadingText: {
+    marginTop: 12,
+    fontSize: 16,
+    color: colors.dark,
+  },
+  retryButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 24,
+    paddingVertical: 10,
+    borderRadius: 8,
+    marginTop: 16,
+  },
+  retryButtonText: {
+    color: colors.white,
+    fontSize: 14,
+    fontWeight: '600',
   },
   menuSection: {
     marginBottom: 24,

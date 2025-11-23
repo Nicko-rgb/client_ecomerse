@@ -9,6 +9,7 @@ import { getFontAssets } from './src/theme/fonts';
 import { NavigationContainer } from '@react-navigation/native';
 import AppNavigator from './src/navigation/AppNavigator';
 import { CartProvider } from './src/context/CartContext';
+import { AuthProvider } from './src/context/AuthContext';
 
 export default function App() {
   const [fontsLoaded] = useFonts(getFontAssets());
@@ -21,11 +22,13 @@ export default function App() {
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1, backgroundColor: colors.bg }} edges={['top', 'bottom']}>
-          <CartProvider>
-            <NavigationContainer>
-              <AppNavigator />
-            </NavigationContainer>
-          </CartProvider>
+          <AuthProvider>
+            <CartProvider>
+              <NavigationContainer>
+                <AppNavigator />
+              </NavigationContainer>
+            </CartProvider>
+          </AuthProvider>
           <StatusBar style="dark" />
         </SafeAreaView>
       </SafeAreaProvider>

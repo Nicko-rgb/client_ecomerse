@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import API_CONFIG from '../../../config/api';
 import { User } from '../models/User';
 
 const API_BASE_URL = API_CONFIG.BASE_URL;
 
-export const useProfile = (userId = 1) => {
+export const useProfile = (userId) => {
   const [profile, setProfile] = useState(null);
   const [addresses, setAddresses] = useState([]);
   const [paymentMethods, setPaymentMethods] = useState([]);
@@ -17,7 +18,22 @@ export const useProfile = (userId = 1) => {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`${API_BASE_URL}/profile/${userId}`);
+      // Obtener token
+      const token = await AsyncStorage.getItem('token');
+      const user = JSON.parse(await AsyncStorage.getItem('user'));
+      
+      if (!token || !user) {
+        setError('No autenticado');
+        return;
+      }
+      
+      const profileUserId = userId || user.id;
+      
+      const response = await fetch(`${API_BASE_URL}/profile/${profileUserId}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -46,10 +62,15 @@ export const useProfile = (userId = 1) => {
       setLoading(true);
       setError(null);
       
-      const response = await fetch(`${API_BASE_URL}/profile/${userId}`, {
+      const token = await AsyncStorage.getItem('token');
+      const user = JSON.parse(await AsyncStorage.getItem('user'));
+      const profileUserId = userId || user.id;
+      
+      const response = await fetch(`${API_BASE_URL}/profile/${profileUserId}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(updates),
       });
@@ -77,7 +98,21 @@ export const useProfile = (userId = 1) => {
   // Obtener direcciones
   const fetchAddresses = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/profile/${userId}/addresses`);
+      const token = await AsyncStorage.getItem('token');
+      const user = JSON.parse(await AsyncStorage.getItem('user'));
+      
+      // No hacer request si no hay usuario autenticado
+      if (!token || !user) {
+        return;
+      }
+      
+      const profileUserId = userId || user.id;
+      
+      const response = await fetch(`${API_BASE_URL}/profile/${profileUserId}/addresses`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -125,7 +160,21 @@ export const useProfile = (userId = 1) => {
   // Obtener métodos de pago
   const fetchPaymentMethods = async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/profile/${userId}/payment-methods`);
+      const token = await AsyncStorage.getItem('token');
+      const user = JSON.parse(await AsyncStorage.getItem('user'));
+      
+      // No hacer request si no hay usuario autenticado
+      if (!token || !user) {
+        return;
+      }
+      
+      const profileUserId = userId || user.id;
+      
+      const response = await fetch(`${API_BASE_URL}/profile/${profileUserId}/payment-methods`, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
@@ -171,9 +220,19 @@ export const useProfile = (userId = 1) => {
   };
 
   useEffect(() => {
-    fetchProfile();
-    fetchAddresses();
-    fetchPaymentMethods();
+    const loadData = async () => {
+      const token = await AsyncStorage.getItem('token');
+      const user = await AsyncStorage.getItem('user');
+      
+      // Solo cargar datos si hay usuario autenticado
+      if (token && user) {
+        fetchProfile();
+        fetchAddresses();
+        fetchPaymentMethods();
+      }
+    };
+    
+    loadData();
   }, [userId]);
 
   return {
