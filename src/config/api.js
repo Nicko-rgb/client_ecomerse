@@ -1,18 +1,16 @@
-// Configuración de la API
-// Cambia esta IP por la IP de tu computadora cuando desarrolles
-// Para obtener tu IP: ejecuta 'ipconfig' en Windows o 'ifconfig' en Mac/Linux
+import { Platform } from 'react-native';
+
+const ENV_URL = process.env.EXPO_PUBLIC_API_URL || process.env.API_URL || '';
+const ENV_PORT = process.env.EXPO_PUBLIC_API_PORT || process.env.API_PORT || '5000';
+const DEFAULT_IP = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
 
 const API_CONFIG = {
-  // IP local de desarrollo - cambiar según tu red
-  LOCAL_IP: '192.168.18.24',
-  PORT: '5000',
-  
-  // URLs de la API
+  LOCAL_IP: ENV_URL ? '' : DEFAULT_IP,
+  PORT: ENV_PORT,
   get BASE_URL() {
-    return `http://${this.LOCAL_IP}:${this.PORT}/api`;
+    const base = ENV_URL ? ENV_URL.replace(/\/$/, '') : `http://${this.LOCAL_IP}:${this.PORT}`;
+    return `${base}/api`;
   },
-  
-  // Endpoints
   ENDPOINTS: {
     PROFILE: '/profile',
     ADDRESSES: '/addresses',
