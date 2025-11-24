@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useCart } from '../../../context/CartContext';
+import OrderSummaryExpandable from '../components/OrderSummaryExpandable';
 import { checkoutStyles } from '../styles/checkoutStyles';
 import colors from '../../../theme/colors';
 
@@ -30,6 +31,8 @@ export default function CheckoutScreen({ navigation }) {
     city: '',
     zipCode: '',
   });
+  
+  const [deliveryNotes, setDeliveryNotes] = useState('');
 
   const subtotal = getSubtotal();
   const shipping = 5.00;
@@ -72,6 +75,16 @@ export default function CheckoutScreen({ navigation }) {
     return true;
   };
 
+  const navigateToConfirmation = () => {
+    const orderNumber = Math.floor(Math.random() * 1000000);
+    clearCart();
+    navigation.replace('OrderConfirmation', {
+      orderNumber,
+      total,
+      estimatedDelivery: '3-5 días hábiles'
+    });
+  };
+
   const handlePlaceOrder = () => {
     if (!validateForm()) return;
 
@@ -98,36 +111,27 @@ export default function CheckoutScreen({ navigation }) {
   };
 
   return (
-    <KeyboardAvoidingView 
-      style={checkoutStyles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Resumen del pedido */}
-        <View style={checkoutStyles.section}>
-          <Text style={checkoutStyles.sectionTitle}>Resumen del Pedido</Text>
-          <View style={checkoutStyles.card}>
-            <View style={checkoutStyles.summaryRow}>
-              <Text style={checkoutStyles.summaryLabel}>
-                {items.length} {items.length === 1 ? 'producto' : 'productos'}
-              </Text>
-              <Text style={checkoutStyles.summaryValue}>${subtotal.toFixed(2)}</Text>
-            </View>
-            <View style={checkoutStyles.summaryRow}>
-              <Text style={checkoutStyles.summaryLabel}>Envío</Text>
-              <Text style={checkoutStyles.summaryValue}>${shipping.toFixed(2)}</Text>
-            </View>
-            <View style={checkoutStyles.summaryRow}>
-              <Text style={checkoutStyles.summaryLabel}>Impuestos</Text>
-              <Text style={checkoutStyles.summaryValue}>${tax.toFixed(2)}</Text>
-            </View>
-            <View style={checkoutStyles.divider} />
-            <View style={checkoutStyles.summaryRow}>
-              <Text style={checkoutStyles.totalLabel}>Total</Text>
-              <Text style={checkoutStyles.totalValue}>${total.toFixed(2)}</Text>
-            </View>
+    <View style={checkoutStyles.container}>
+      <KeyboardAvoidingView 
+        style={{ flex: 1 }}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
+      >
+        <ScrollView 
+          showsVerticalScrollIndicator={false}
+          contentContainerStyle={checkoutStyles.scrollContent}
+          keyboardShouldPersistTaps="handled"
+        >
+          {/* Resumen del pedido expandible */}
+          <View style={checkoutStyles.section}>
+            <OrderSummaryExpandable
+              items={items}
+              subtotal={subtotal}
+              shipping={shipping}
+              tax={tax}
+              total={total}
+            />
           </View>
-        </View>
 
         {/* Dirección de envío */}
         <View style={checkoutStyles.section}>
@@ -169,6 +173,19 @@ export default function CheckoutScreen({ navigation }) {
                 onChangeText={(text) => setShippingAddress({...shippingAddress, zipCode: text})}
               />
             </View>
+            <TextInput
+              style={[checkoutStyles.input, checkoutStyles.textArea]}
+              placeholder="Notas de entrega (opcional)"
+              placeholderTextColor={colors.muted}
+              value={deliveryNotes}
+              onChangeText={setDeliveryNotes}
+              multiline
+              numberOfLines={3}
+              textAlignVertical="top"
+            />
+            <Text style={checkoutStyles.helperText}>
+              Ej: Dejar en portería, tocar timbre 2 veces, etc.
+            </Text>
           </View>
         </View>
 
@@ -302,19 +319,27 @@ export default function CheckoutScreen({ navigation }) {
             Tu información está protegida con encriptación SSL
           </Text>
         </View>
-      </ScrollView>
 
-      {/* Botón de confirmar pedido */}
+        {/* Espacio extra para que el contenido no quede detrás del botón */}
+        <View style={{ height: 100 }} />
+      </ScrollView>
+      </KeyboardAvoidingView>
+
+      {/* Botón de confirmar pedido - Siempre visible */}
       <View style={checkoutStyles.footer}>
         <TouchableOpacity 
           style={checkoutStyles.placeOrderButton}
-          onPress={handlePlaceOrder}
+          onPress={() => {
+            if (validateForm()) {
+              navigateToConfirmation();
+            }
+          }}
         >
           <Text style={checkoutStyles.placeOrderText}>
             Confirmar Pedido - ${total.toFixed(2)}
           </Text>
         </TouchableOpacity>
       </View>
-    </KeyboardAvoidingView>
+    </View>
   );
 }
