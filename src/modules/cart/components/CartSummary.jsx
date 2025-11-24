@@ -5,8 +5,10 @@ import { cartStyles } from '../styles/cartStyles';
 
 export default function CartSummary({ subtotal, onCheckout }) {
   const navigation = useNavigation();
-  const shipping = subtotal > 0 ? 5.00 : 0;
-  const tax = subtotal * 0.10; // 10% de impuesto
+  
+  const freeShippingThreshold = 50.00;
+  const shipping = subtotal >= freeShippingThreshold ? 0 : 5.00;
+  const tax = subtotal * 0.10;
   const total = subtotal + shipping + tax;
 
   const handleCheckout = () => {
@@ -25,8 +27,12 @@ export default function CartSummary({ subtotal, onCheckout }) {
       </View>
       
       <View style={cartStyles.summaryRow}>
-        <Text style={cartStyles.summaryLabel}>Envío</Text>
-        <Text style={cartStyles.summaryValue}>${shipping.toFixed(2)}</Text>
+        <Text style={cartStyles.summaryLabel}>
+          Envío {shipping === 0 && '(Gratis)'}
+        </Text>
+        <Text style={cartStyles.summaryValue}>
+          {shipping === 0 ? 'Gratis' : `$${shipping.toFixed(2)}`}
+        </Text>
       </View>
       
       <View style={cartStyles.summaryRow}>

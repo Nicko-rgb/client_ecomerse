@@ -4,7 +4,7 @@
 
 const API_CONFIG = {
   // IP local de desarrollo - cambiar según tu red
-  LOCAL_IP: '10.106.183.4',
+  LOCAL_IP: '192.168.18.24',
   PORT: '5000',
   
   // URLs de la API

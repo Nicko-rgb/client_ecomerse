@@ -6,6 +6,10 @@ export const checkoutStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.bg,
   },
+  scrollContent: {
+    flexGrow: 1,
+    paddingBottom: 20,
+  },
   section: {
     padding: 16,
   },
@@ -63,6 +67,17 @@ export const checkoutStyles = StyleSheet.create({
     marginBottom: 12,
     borderWidth: 1,
     borderColor: colors.border,
+  },
+  textArea: {
+    minHeight: 80,
+    paddingTop: 12,
+  },
+  helperText: {
+    fontSize: 12,
+    color: colors.muted,
+    marginTop: -8,
+    marginBottom: 12,
+    fontStyle: 'italic',
   },
   row: {
     flexDirection: 'row',
@@ -124,6 +139,10 @@ export const checkoutStyles = StyleSheet.create({
     fontWeight: '600',
   },
   footer: {
+    position: 'absolute',
+    bottom: 0,
+    left: 0,
+    right: 0,
     backgroundColor: colors.white,
     padding: 16,
     borderTopWidth: 1,

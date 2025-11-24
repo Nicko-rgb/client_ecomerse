@@ -6,6 +6,8 @@ import CartItem from '../components/CartItem';
 import EmptyCart from '../components/EmptyCart';
 import CartSummary from '../components/CartSummary';
 import ProductDetailModal from '../components/ProductDetailModal';
+import FreeShippingProgress from '../components/FreeShippingProgress';
+import RecommendedProducts from '../components/RecommendedProducts';
 import { cartStyles } from '../styles/cartStyles';
 
 export default function CartScreen({ navigation }) {
@@ -78,6 +80,8 @@ export default function CartScreen({ navigation }) {
         data={items}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={cartStyles.listContent}
+        ListHeaderComponent={<FreeShippingProgress subtotal={subtotal} />}
+        ListFooterComponent={<RecommendedProducts />}
         renderItem={({ item }) => (
           <CartItem
             item={item}
