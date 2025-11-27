@@ -14,14 +14,14 @@ export default function CartItem({ item, onIncrement, onDecrement, onRemove, onP
       onPress={onPress}
     >
       <Image 
-        source={{ uri: item.image }} 
+        source={{ uri: (item.image ? item.image : (Array.isArray(item.images) && item.images.length ? item.images[0] : undefined)) || 'https://via.placeholder.com/300' }} 
         style={cartStyles.itemImage}
         resizeMode="cover"
       />
       
       <View style={cartStyles.itemDetails}>
         <Text style={cartStyles.itemTitle} numberOfLines={2}>
-          {item.title}
+          {item.title || item.name}
         </Text>
         
         <Text style={cartStyles.itemPrice}>
