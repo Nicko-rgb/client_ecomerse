@@ -7,10 +7,11 @@ export default StyleSheet.create({
     container: { 
         flex: 1,
         backgroundColor: colors.bg,
-        paddingHorizontal: 10,
+        // paddingHorizontal: 6,
         flexDirection: 'column',
     },
     searchBox: {
+        marginHorizontal: 6,
         flexDirection: 'row',
         alignItems: 'center',
         borderWidth: 2,
@@ -26,6 +27,7 @@ export default StyleSheet.create({
     chipsRow: { 
         paddingVertical: 10,
         borderWidth: 1,
+        marginHorizontal: 6,
         borderColor: 'transparent',
         flexGrow: 0,
     },
@@ -49,12 +51,21 @@ export default StyleSheet.create({
         color: colors.primary,
     },
 
+    // Slider de top productos
+    sliderContainer: {
+        marginBottom: 8
+    },
+
+    gridColumn: {
+        justifyContent: 'space-between',
+        paddingHorizontal: 6
+    },
     // Product Grid
     grid: { 
         paddingBottom: 16,
     },
     cardItem: {
-        flex: 1,
+        width: '49%',
         marginBottom: 8,
     },
 });
