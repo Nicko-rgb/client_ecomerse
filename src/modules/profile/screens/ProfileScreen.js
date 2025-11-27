@@ -139,14 +139,14 @@ const ProfileScreen = ({ navigation }) => {
           <ProfileMenuItem
             icon="📍"
             title="Direcciones"
-            subtitle={`${addresses.length} direcciones guardadas`}
+            subtitle={`${(addresses && addresses.length) ? addresses.length : 0} direcciones guardadas`}
             onPress={handleAddresses}
           />
           
           <ProfileMenuItem
             icon="💳"
             title="Métodos de Pago"
-            subtitle={`${paymentMethods.length} métodos guardados`}
+            subtitle={`${(paymentMethods && paymentMethods.length) ? paymentMethods.length : 0} métodos guardados`}
             onPress={handlePaymentMethods}
           />
           

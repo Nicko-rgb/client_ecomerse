@@ -1,19 +1,19 @@
 import React, { useState, useMemo } from 'react';
-import { View, Text, TextInput, ScrollView, FlatList, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, TextInput, ScrollView, FlatList, TouchableOpacity, ActivityIndicator, RefreshControl } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import AppHeader from '../components/AppHeader';
 import ProductCard from '../components/ProductCard';
-import { useProducts, useCategories } from '../../../hooks/useProducts';
+import { useProducts, useCategories } from '../hooks/useProducts';
 import styles from '../styles/homeStyles';
 import colors from '../../../theme/colors';
 import { fontNames } from '../../../theme/fonts';
 
 export default function HomeScreen() {
-    const { products: apiProducts, loading: loadingProducts, error: errorProducts } = useProducts();
-    const { categories: apiCategories, loading: loadingCategories } = useCategories();
-    
     const [search, setSearch] = useState('');
     const [category, setCategory] = useState('Explorar');
+    const selectedCategory = useMemo(() => (category === 'Explorar' ? undefined : category), [category]);
+    const { products: apiProducts, loading: loadingProducts, error: errorProducts, refreshing, loadingMore, hasMore, refreshProducts, loadMore } = useProducts({ category: selectedCategory, search });
+    const { categories: apiCategories, loading: loadingCategories } = useCategories();
 
     // Agregar "Explorar" al inicio de las categorías
     // Las categorías de la API vienen como objetos {name, count}, extraer solo el nombre
@@ -24,14 +24,8 @@ export default function HomeScreen() {
         return ['Explorar', ...categoryNames];
     }, [apiCategories]);
 
-    // Filtrar productos por categoría y búsqueda
-    const products = useMemo(() => {
-        return apiProducts.filter((p) => {
-            const byCat = category === 'Explorar' ? true : p.category === category;
-            const bySearch = search.length === 0 ? true : p.name.toLowerCase().includes(search.toLowerCase());
-            return byCat && bySearch;
-        });
-    }, [apiProducts, search, category]);
+    // Productos provienen del servidor con filtros y paginación
+    const products = apiProducts;
 
     if (loadingProducts || loadingCategories) {
         return (
@@ -102,6 +96,14 @@ export default function HomeScreen() {
                     columnWrapperStyle={{ justifyContent: 'space-between' }}
                     contentContainerStyle={styles.grid}
                     showsVerticalScrollIndicator={false}
+                    refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => refreshProducts({ category: selectedCategory, search })} />}
+                    onEndReached={() => hasMore && loadMore()}
+                    onEndReachedThreshold={0.3}
+                    ListFooterComponent={loadingMore ? (
+                        <View style={{ paddingVertical: 16 }}>
+                            <ActivityIndicator size="small" color={colors.primary} />
+                        </View>
+                    ) : null}
                 />
             )}
         </View>

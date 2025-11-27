@@ -1,21 +1,49 @@
+import axios from 'axios';
 import { Platform } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const ENV_URL = process.env.EXPO_PUBLIC_API_URL || process.env.API_URL || '';
-const ENV_PORT = process.env.EXPO_PUBLIC_API_PORT || process.env.API_PORT || '5000';
-const DEFAULT_IP = Platform.OS === 'android' ? '10.0.2.2' : 'localhost';
+const PORT = process.env.EXPO_PUBLIC_API_PORT || 5000;
+const ENV_API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-const API_CONFIG = {
-  LOCAL_IP: ENV_URL ? '' : DEFAULT_IP,
-  PORT: ENV_PORT,
-  get BASE_URL() {
-    const base = ENV_URL ? ENV_URL.replace(/\/$/, '') : `http://${this.LOCAL_IP}:${this.PORT}`;
-    return `${base}/api`;
-  },
-  ENDPOINTS: {
-    PROFILE: '/profile',
-    ADDRESSES: '/addresses',
-    PAYMENT_METHODS: '/payment-methods',
-  }
+const normalizeApiBase = (url) => {
+  if (!url) return null;
+  const trimmed = url.replace(/\/+$/, '');
+  return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
 };
 
+const getDefaultBaseURL = () => {
+  const envBase = normalizeApiBase(ENV_API_URL);
+  if (envBase) return envBase;
+  if (Platform.OS === 'android') return `http://10.0.2.2:${PORT}/api`;
+  return `http://localhost:${PORT}/api`;
+};
+
+const BASE_URL = getDefaultBaseURL();
+
+const apiClient = axios.create({ baseURL: BASE_URL });
+
+apiClient.interceptors.request.use(async (config) => {
+    try {
+        const token = await AsyncStorage.getItem('token');
+        if (token) {
+            config.headers = config.headers || {};
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+    } catch (e) { }
+    return config;
+});
+
+apiClient.interceptors.response.use(
+    (response) => response,
+    (error) => {
+        if (error.response && error.response.status === 401) {
+            return Promise.reject({ ...error, handled: true });
+        }
+        return Promise.reject(error);
+    }
+);
+
+const API_CONFIG = { BASE_URL };
+
 export default API_CONFIG;
+export { BASE_URL, apiClient };

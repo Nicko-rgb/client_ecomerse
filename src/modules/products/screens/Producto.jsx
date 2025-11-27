@@ -1,19 +1,27 @@
-import React from 'react';
+import React, { useMemo, useState } from 'react';
 import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '../../../theme/colors';
 import { fontNames } from '../../../theme/fonts';
 import { useCart } from '../../../context/CartContext';
-import useProducto from '../hooks/useProducto';
+import { useProductDetails } from '../hooks/useProducts';
 import styles from '../styles/productoStyles';
 
 export default function Producto({ route, navigation }) {
-    const { product } = route.params;
+    const { product: initial } = route.params;
     const { addToCart } = useCart();
-    const { gallery, selected, setSelected, similares } = useProducto(product);
+    const { product, relatedProducts } = useProductDetails(initial.id);
+    const [selected, setSelected] = useState(0);
+    const current = product || initial;
+    const gallery = useMemo(() => {
+        const arr = Array.isArray(current.images) && current.images.length ? current.images : [current.image];
+        return arr.slice(0, 4);
+    }, [current]);
 
     return (
-        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 24 }}>
+        <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 24 }} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
+
+            {/* Header */}
             <View style={styles.headerRow}>
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <Ionicons name="arrow-back" size={24} color={colors.primary} />
@@ -21,7 +29,8 @@ export default function Producto({ route, navigation }) {
                 <Text style={styles.headerTitle}>Detalles del producto</Text>
             </View>
 
-            <View style={styles.mediaRow}>
+            {/* Caja de imagenes */}
+            <View style={styles.mediaBox}>
                 <View style={styles.thumbsCol}>
                     {gallery.map((uri, i) => (
                         <TouchableOpacity key={i} onPress={() => setSelected(i)} style={[styles.thumbItem, selected === i && styles.thumbItemActive]}>
@@ -29,20 +38,45 @@ export default function Producto({ route, navigation }) {
                         </TouchableOpacity>
                     ))}
                 </View>
-                <View style={styles.mainImageBox}>
+                <TouchableOpacity
+                    activeOpacity={0.9}
+                    style={styles.mainImageContainer}
+                    onPress={() =>
+                        navigation.navigate('ImageViewer', {
+                            images: gallery,
+                            index: selected
+                        })
+                    }
+                >
                     <Image source={{ uri: gallery[selected] }} style={styles.mainImage} />
-                </View>
+                </TouchableOpacity>
+
             </View>
 
-            <View style={styles.titleRow}>
-                <Text style={styles.titleText}>{product.title}</Text>
-                <View style={styles.pricePill}>
-                    <Text style={styles.priceText}>$ {product.price.toFixed(2)}</Text>
+            <Text style={styles.titleText}>{current.name || current.title}</Text>
+
+            {/* Precio y calificacion */}
+            <View style={styles.priceRow}>
+                <View style={styles.ratingRow}>
+                    <View style={styles.stars}>
+                        <Ionicons name="star" size={16} color={colors.yellow} />
+                        <Ionicons name="star" size={16} color={colors.yellow} />
+                        <Ionicons name="star" size={16} color={colors.yellow} />
+                        <Ionicons name="star" size={16} color={colors.yellow} />
+                    </View>
+                    <Text style={styles.ratingText}>4.5 | +456 vendidos(as)</Text>
+                </View>
+                <View style={styles.prices}>
+                    {current.old_price != null && (
+                        <Text style={styles.oldPriceText}>$ {current.old_price.toFixed ? current.old_price.toFixed(2) : current.old_price}</Text>
+                    )}
+                    <Text style={styles.priceText}>$ {current.price.toFixed ? current.price.toFixed(2) : current.price}</Text>
                 </View>
             </View>
 
             <View style={styles.actionsRow}>
-                <TouchableOpacity style={[styles.btn, styles.btnOutline]} onPress={() => addToCart(product)}>
+                <Ionicons name="cart" size={24} color={colors.primary} />
+                <TouchableOpacity style={[styles.btn, styles.btnOutline]} onPress={() => addToCart(current)}>
                     <Text style={[styles.btnText, { color: colors.primary }]}>Agregar a Carrito</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.btn, styles.btnFill]}>
@@ -51,18 +85,46 @@ export default function Producto({ route, navigation }) {
             </View>
 
             <Text style={styles.description}>
-                Las laptops {product.title} son dispositivos de gama alta diseñados para productividad y creatividad.
+                {current.description}
             </Text>
+
+            {Array.isArray(current.features) && current.features.length > 0 && (
+                <View style={{ marginTop: 12 }}>
+                    <Text style={styles.similaresTitle}>Características</Text>
+                    {current.features.map((f, idx) => (
+                        <View key={`feat-${idx}`} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 3 }}>
+                            <Text style={{ color: colors.gray, fontFamily: fontNames.spartanRegular }}>{f.name}</Text>
+                            <Text style={{ fontFamily: fontNames.spartanBold }}>{f.value}</Text>
+                        </View>)
+                    )}
+                </View>
+            )}
 
             <Text style={styles.similaresTitle}>Productos similares</Text>
             <View style={styles.similaresGrid}>
-                {similares.map((p) => (
-                    <View style={styles.similarCard} key={p.id}>
-                        <Image source={{ uri: p.image }} style={styles.similarImg} />
-                        <Text style={styles.similarTitle}>{p.title}</Text>
-                        <Text style={styles.similarPrice}>$ {p.price.toFixed(2)}</Text>
-                    </View>
-                ))}
+                {relatedProducts.map((p) => {
+                    const productData = {
+                        id: p.id,
+                        name: p.name || p.title,
+                        price: p.price,
+                        image: (p.images && p.images[0]) || p.image,
+                        images: p.images,
+                        category: p.category,
+                        description: p.description,
+                        stock: p.stock
+                    };
+                    return (
+                        <TouchableOpacity
+                            style={styles.similarCard}
+                            key={p.id}
+                            onPress={() => navigation.navigate('Producto', { product: productData })}
+                        >
+                            <Image source={{ uri: productData.image }} style={styles.similarImg} />
+                            <Text style={styles.similarTitle}>{productData.name}</Text>
+                            <Text style={styles.similarPrice}>$ {productData.price.toFixed ? productData.price.toFixed(2) : productData.price}</Text>
+                        </TouchableOpacity>
+                    );
+                })}
             </View>
         </ScrollView>
     );

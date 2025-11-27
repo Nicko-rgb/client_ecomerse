@@ -23,7 +23,7 @@ export default function ProductCard({ product }) {
     
     return (
         <TouchableOpacity activeOpacity={0.9} onPress={() => navigation.navigate('Producto', { product: productData })} style={{ backgroundColor: colors.card, borderRadius: 12, padding: 10, borderWidth: 1, borderColor: colors.border, flex: 1 }}>
-            <Image source={{ uri: productData.image }} style={{ width: '100%', height: 110, borderRadius: 10 }} resizeMode="cover" />
+            <Image source={{ uri: productData.image }} style={{ width: '100%', height: 110, borderRadius: 10 }} resizeMode="contain" />
             <Text style={{ marginTop: 8, fontWeight: '700', color: colors.text }} numberOfLines={2}>{productData.title}</Text>
             <Text style={{ marginTop: 4, fontWeight: '700', color: colors.text }}>$ {productData.price.toFixed(2)}</Text>
             <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 4 }}>
