@@ -5,6 +5,7 @@ import { Ionicons } from '@expo/vector-icons';
 import colors from '../theme/colors';
 import WelcomeScreen from '../modules/welcome/screens/WelcomeScreen';
 import HomeScreen from '../modules/products/screens/HomeScreen';
+import ImageViewer from '../modules/products/screens/ImageViewer';
 import Producto from '../modules/products/screens/Producto';
 import CartScreen from '../modules/cart/screens/CartScreen';
 import CheckoutScreen from '../modules/cart/screens/CheckoutScreen';
@@ -61,33 +62,33 @@ function ProductosStack() {
 }
 
 function MainTabs() {
-    const { count } = useCart();
-    return (
-        <Tab.Navigator
-            screenOptions={({ route }) => ({
-                headerShown: false,
-                tabBarActiveTintColor: colors.primary,
-                tabBarInactiveTintColor: colors.primaryLight,
-                tabBarStyle: { height: 64 },
-                tabBarIcon: ({ color, size }) => {
-                    if (route.name === 'Productos') return <Ionicons name="home" size={size} color={color} />;
-                    if (route.name === 'Carrito') return <Ionicons name="cart" size={size} color={color} />;
-                    return <Ionicons name="person" size={size} color={color} />;
-                },
-            })}
-        >
+  const { count } = useCart();
+  return (
+    <Tab.Navigator
+      screenOptions={({ route }) => ({
+        headerShown: false,
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.primaryLight,
+        tabBarStyle: { height: 64 },
+        tabBarIcon: ({ color, size }) => {
+          if (route.name === 'Productos') return <Ionicons name="home" size={size} color={color} />;
+          if (route.name === 'Carrito') return <Ionicons name="cart" size={size} color={color} />;
+          return <Ionicons name="person" size={size} color={color} />;
+        },
+      })}
+    >
       <Tab.Screen name="Productos" component={ProductosStack} />
-            <Tab.Screen
-                name="Carrito"
-                component={CartScreen}
-                options={{
-                    tabBarBadge: count > 0 ? count : undefined,
-                    tabBarBadgeStyle: { backgroundColor: '#44C38D' },
-                }}
-            />
-            <Tab.Screen name="Perfil" component={ProfileScreen} />
-        </Tab.Navigator>
-    );
+      <Tab.Screen
+        name="Carrito"
+        component={CartScreen}
+        options={{
+          tabBarBadge: count > 0 ? count : undefined,
+          tabBarBadgeStyle: { backgroundColor: '#44C38D' },
+        }}
+      />
+      <Tab.Screen name="Perfil" component={ProfileScreen} />
+    </Tab.Navigator>
+  );
 }
 
 export default function AppNavigator() {
@@ -105,143 +106,148 @@ export default function AppNavigator() {
     >
       <Stack.Screen name="Bienvenida" component={WelcomeScreen} options={{ headerShown: false }} />
       <Stack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
-      <Stack.Screen 
-        name="Checkout" 
+      <Stack.Screen
+        name="Checkout"
         component={CheckoutScreen}
         options={{ title: 'Finalizar Compra' }}
       />
-      <Stack.Screen 
-        name="OrderConfirmation" 
+      <Stack.Screen
+        name="OrderConfirmation"
         component={OrderConfirmationScreen}
         options={{ headerShown: false }}
       />
-      
+      <Stack.Screen
+        name="ImageViewer"
+        component={ImageViewer}
+        options={{ headerShown: false }}
+      />
+
       {/* Pantallas del módulo Profile */}
-      <Stack.Screen 
-        name="EditProfile" 
+      <Stack.Screen
+        name="EditProfile"
         component={EditProfileScreen}
         options={{ title: 'Editar Perfil' }}
       />
-      <Stack.Screen 
-        name="AddressesScreen" 
+      <Stack.Screen
+        name="AddressesScreen"
         component={AddressesScreen}
         options={{ title: 'Mis Direcciones' }}
       />
-      <Stack.Screen 
-        name="AddAddressScreen" 
+      <Stack.Screen
+        name="AddAddressScreen"
         component={AddAddressScreen}
         options={{ title: 'Agregar Dirección' }}
       />
-      <Stack.Screen 
-        name="PaymentMethodsScreen" 
+      <Stack.Screen
+        name="PaymentMethodsScreen"
         component={PaymentMethodsScreen}
         options={{ title: 'Métodos de Pago' }}
       />
-      <Stack.Screen 
-        name="OrderHistoryScreen" 
+      <Stack.Screen
+        name="OrderHistoryScreen"
         component={OrderHistoryScreen}
         options={{ title: 'Mis Pedidos' }}
       />
-      <Stack.Screen 
-        name="SettingsScreen" 
+      <Stack.Screen
+        name="SettingsScreen"
         component={SettingsScreen}
         options={{ title: 'Configuración' }}
       />
-      <Stack.Screen 
-        name="HelpScreen" 
+      <Stack.Screen
+        name="HelpScreen"
         component={HelpScreen}
         options={{ title: 'Ayuda y Soporte' }}
       />
-      <Stack.Screen 
-        name="TermsScreen" 
+      <Stack.Screen
+        name="TermsScreen"
         component={TermsScreen}
         options={{ title: 'Términos y Condiciones' }}
       />
-      
+
       {/* Pantallas adicionales del perfil */}
-      <Stack.Screen 
-        name="EditAddressScreen" 
+      <Stack.Screen
+        name="EditAddressScreen"
         component={EditAddressScreen}
         options={{ title: 'Editar Dirección' }}
       />
-      <Stack.Screen 
-        name="AddPaymentMethodScreen" 
+      <Stack.Screen
+        name="AddPaymentMethodScreen"
         component={AddPaymentMethodScreen}
         options={{ title: 'Agregar Método de Pago' }}
       />
-      <Stack.Screen 
-        name="EditPaymentMethodScreen" 
+      <Stack.Screen
+        name="EditPaymentMethodScreen"
         component={EditPaymentMethodScreen}
         options={{ title: 'Editar Método de Pago' }}
       />
-      <Stack.Screen 
-        name="OrderDetailsScreen" 
+      <Stack.Screen
+        name="OrderDetailsScreen"
         component={OrderDetailsScreen}
         options={{ title: 'Detalles del Pedido' }}
       />
-      <Stack.Screen 
-        name="ChangePasswordScreen" 
+      <Stack.Screen
+        name="ChangePasswordScreen"
         component={ChangePasswordScreen}
         options={{ title: 'Cambiar Contraseña' }}
       />
-      
+
       {/* Pantallas del módulo Admin */}
-      <Stack.Screen 
-        name="AdminDashboardScreen" 
+      <Stack.Screen
+        name="AdminDashboardScreen"
         component={AdminDashboardScreen}
         options={{ title: 'Dashboard Admin' }}
       />
-      <Stack.Screen 
-        name="AdminProductsScreen" 
+      <Stack.Screen
+        name="AdminProductsScreen"
         component={AdminProductsScreen}
         options={{ title: 'Gestión de Productos' }}
       />
-      <Stack.Screen 
-        name="AdminCreateProductScreen" 
+      <Stack.Screen
+        name="AdminCreateProductScreen"
         component={AdminCreateProductScreen}
         options={{ title: 'Crear Producto' }}
       />
-      <Stack.Screen 
-        name="AdminEditProductScreen" 
+      <Stack.Screen
+        name="AdminEditProductScreen"
         component={AdminEditProductScreen}
         options={{ title: 'Editar Producto' }}
       />
-      <Stack.Screen 
-        name="AdminOrdersScreen" 
+      <Stack.Screen
+        name="AdminOrdersScreen"
         component={AdminOrdersScreen}
         options={{ title: 'Gestión de Pedidos' }}
       />
-      <Stack.Screen 
-        name="AdminOrderDetailsScreen" 
+      <Stack.Screen
+        name="AdminOrderDetailsScreen"
         component={AdminOrderDetailsScreen}
         options={{ title: 'Detalles del Pedido' }}
       />
-      <Stack.Screen 
-        name="AdminUsersScreen" 
+      <Stack.Screen
+        name="AdminUsersScreen"
         component={AdminUsersScreen}
         options={{ title: 'Gestión de Usuarios' }}
       />
-      <Stack.Screen 
-        name="AdminUserDetailsScreen" 
+      <Stack.Screen
+        name="AdminUserDetailsScreen"
         component={AdminUserDetailsScreen}
         options={{ title: 'Detalles del Usuario' }}
       />
-      
+
       {/* Pantallas de Autenticación */}
-      <Stack.Screen 
-        name="LoginScreen" 
+      <Stack.Screen
+        name="LoginScreen"
         component={LoginScreen}
         options={{ title: 'Iniciar Sesión', headerShown: false }}
       />
-      <Stack.Screen 
-        name="RegisterScreen" 
+      <Stack.Screen
+        name="RegisterScreen"
         component={RegisterScreen}
         options={{ title: 'Crear Cuenta' }}
       />
-      
+
       {/* Pantalla de Privacidad */}
-      <Stack.Screen 
-        name="PrivacySettingsScreen" 
+      <Stack.Screen
+        name="PrivacySettingsScreen"
         component={require('../modules/profile/screens/PrivacySettingsScreen').default}
         options={{ title: 'Privacidad y Datos' }}
       />

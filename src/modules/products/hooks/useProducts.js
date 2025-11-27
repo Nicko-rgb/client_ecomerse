@@ -1,101 +1,188 @@
-import { useMemo, useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
+import API_CONFIG, { apiClient } from '../../../config/api';
 
-const CATEGORIES = ['Explorar', 'Tecnología', 'Ropa', 'Accesorios', 'Salud y Belleza',  'Categoria1', 'Categoria2', 'Categoria3', 'Categoria4', 'Categoria5', 'Categoria6'];
+export const useProducts = (filters = {}) => {
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [refreshing, setRefreshing] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
+    const [page, setPage] = useState(1);
+    const [limit] = useState(10);
+    const [hasMore, setHasMore] = useState(true);
 
-const DATA = [
-    {
-        id: '1',
-        title: 'Laptop Asus Zeembook',
-        price: 2999.99,
-        category: 'Tecnología',
-        rating: 5,
-        image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=800&fit=crop',
-    },
-    {
-        id: '2',
-        title: 'Polo marca Sakura',
-        price: 99.99,
-        category: 'Ropa',
-        rating: 4,
-        image: 'https://images.unsplash.com/photo-1520975944220-6cfa88b6a67f?q=80&w=800&fit=crop',
-    },
-    {
-        id: '3',
-        title: 'Zapatillas Adidas',
-        price: 199.99,
-        category: 'Accesorios',
-        rating: 5,
-        image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?q=80&w=800&fit=crop',
-    },
-    {
-        id: '4',
-        title: 'Tacos para mujeres',
-        price: 30.99,
-        category: 'Accesorios',
-        rating: 4,
-        image: 'https://images.unsplash.com/photo-1552346154-21d32810aba3?q=80&w=800&fit=crop',
-    },
-    {
-        id: '5',
-        title: 'Iphone 16 PRO MAX',
-        price: 3999.99,
-        category: 'Categoria1',
-        rating: 5,
-        image: 'https://images.unsplash.com/photo-1598327106820-19b5f97a1c5a?q=80&w=800&fit=crop',
-    },
-    {
-        id: '6',
-        title: 'Monitor Gaming',
-        price: 899.99,
-        category: 'Categoria2',
-        rating: 4,
-        image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=800&fit=crop',
-    },
-    {
-        id: '7',
-        title: 'Iphone 16 PRO MAX',
-        price: 3999.99,
-        category: 'Categoria3',
-        rating: 5,
-        image: 'https://images.unsplash.com/photo-1598327106820-19b5f97a1c5a?q=80&w=800&fit=crop',
-    },
-    {
-        id: '8',
-        title: 'Monitor Gaming',
-        price: 899.99,
-        category: 'Categoria4',
-        rating: 4,
-        image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=800&fit=crop',
-    },
-    {
-        id: '9',
-        title: 'Iphone 16 PRO MAX',
-        price: 3999.99,
-        category: 'Categoria5',
-        rating: 5,
-        image: 'https://images.unsplash.com/photo-1598327106820-19b5f97a1c5a?q=80&w=800&fit=crop',
-    },
-    {
-        id: '10',
-        title: 'Monitor Gaming',
-        price: 899.99,
-        category: 'Categoria6',
-        rating: 4,
-        image: 'https://images.unsplash.com/photo-1517336714731-489689fd1ca8?q=80&w=800&fit=crop',
-    },
-];
+    const fetchProducts = async (customFilters = {}, { reset = false } = {}) => {
+        try {
+            const targetPage = reset ? 1 : page;
+            if (reset) {
+                setRefreshing(true);
+                setError(null);
+            } else {
+                setLoading(true);
+            }
+            const params = { ...filters, ...customFilters, page: targetPage, limit, random: true };
+            const { data } = await apiClient.get('/products', { params });
+            if (data.success) {
+                const incoming = data.data || [];
+                setHasMore(Boolean(data.hasMore));
+                if (reset) {
+                    setProducts(incoming);
+                    setPage(1);
+                } else {
+                    setProducts(prev => {
+                        const map = new Map(prev.map(p => [p.id || p._id, p]));
+                        for (const item of incoming) {
+                            const key = item.id || item._id;
+                            if (!map.has(key)) map.set(key, item);
+                        }
+                        return Array.from(map.values());
+                    });
+                }
+            } else {
+                setError('Error al cargar productos');
+            }
+        } catch (err) {
+            setError(`Error de conexión: ${err.message}`);
+        } finally {
+            if (reset) {
+                setRefreshing(false);
+            } else {
+                setLoading(false);
+            }
+        }
+    };
 
-export default function useProducts() {
-    const [search, setSearch] = useState('');
-    const [category, setCategory] = useState('Explorar');
+    const loadMore = async () => {
+        if (loadingMore || !hasMore) return;
+        try {
+            setLoadingMore(true);
+            const nextPage = page + 1;
+            const params = { ...filters, page: nextPage, limit, random: true };
+            const { data } = await apiClient.get('/products', { params });
+            if (data.success) {
+                const incoming = data.data || [];
+                setHasMore(Boolean(data.hasMore));
+                setProducts(prev => [...prev, ...incoming]);
+                setPage(nextPage);
+            }
+        } catch (err) {
+            // no bloquear UI por error de loadMore
+        } finally {
+            setLoadingMore(false);
+        }
+    };
 
-    const list = useMemo(() => {
-        return DATA.filter((p) => {
-            const byCat = category === 'Explorar' ? true : p.category === category;
-            const bySearch = search.length === 0 ? true : p.title.toLowerCase().includes(search.toLowerCase());
-            return byCat && bySearch;
-        });
-    }, [search, category]);
+    useEffect(() => {
+        // refetch cuando cambian filtros
+        setPage(1);
+        setHasMore(true);
+        fetchProducts({}, { reset: true });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [JSON.stringify(filters)]);
 
-    return { categories: CATEGORIES, products: list, search, setSearch, category, setCategory };
-}
+    return { products, loading, error, refreshing, loadingMore, hasMore, refreshProducts: (custom) => fetchProducts(custom, { reset: true }), loadMore };
+};
+
+export const useFeaturedProducts = () => {
+    const [products, setProducts] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    const fetchFeaturedProducts = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const { data } = await apiClient.get('/products/featured');
+            if (data.success) {
+                setProducts(data.data);
+            }
+        } catch (err) {
+            setError(`Error: ${err.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchFeaturedProducts();
+    }, []);
+
+    return { products, loading, error, refreshProducts: fetchFeaturedProducts };
+};
+
+export const useCategories = () => {
+    const [categories, setCategories] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    const fetchCategories = async () => {
+        try {
+            setLoading(true);
+            setError(null);
+            const { data } = await apiClient.get('/products/categories');
+            if (data.success) {
+                setCategories(data.data);
+            }
+        } catch (err) {
+            setError(`Error: ${err.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchCategories();
+    }, []);
+
+    return { categories, loading, error, refreshCategories: fetchCategories };
+};
+
+export const useProductDetails = (productId) => {
+    const [product, setProduct] = useState(null);
+    const [relatedProducts, setRelatedProducts] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+
+    const fetchProductDetails = async () => {
+        if (!productId) return;
+        try {
+            setLoading(true);
+            setError(null);
+            const { data: productData } = await apiClient.get(`/products/${productId}`);
+            if (productData.success) {
+                setProduct(productData.data);
+                const { data: relatedData } = await apiClient.get(`/products/${productId}/related`);
+                if (relatedData.success) {
+                    setRelatedProducts(relatedData.data);
+                }
+            }
+        } catch (err) {
+            setError(`Error: ${err.message}`);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchProductDetails();
+    }, [productId]);
+
+    return { product, relatedProducts, loading, error, refreshProduct: fetchProductDetails };
+};
+
+export const useProducto = (product) => {
+    const [selected, setSelected] = useState(0);
+    const gallery = useMemo(() => {
+        const arr = [product.image];
+        return [product.image, ...arr, ...arr].slice(0, 4);
+    }, [product.image]);
+
+    const { products } = useProducts();
+    const similares = useMemo(() => {
+        return products
+            .filter((p) => p.category === product.category && (p.id || p._id) !== (product.id || product._id))
+            .slice(0, 4);
+    }, [products, product]);
+
+    return { gallery, selected, setSelected, similares };
+};

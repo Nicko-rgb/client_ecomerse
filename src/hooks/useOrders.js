@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import API_CONFIG from '../config/api';
+import API_CONFIG, { apiClient } from '../config/api';
 
 const API_BASE_URL = API_CONFIG.BASE_URL;
 
@@ -21,17 +21,9 @@ export const useOrders = () => {
         return;
       }
       
-      const response = await fetch(`${API_BASE_URL}/orders`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const { data } = await apiClient.get('/orders', {
+        headers: { Authorization: `Bearer ${token}` }
       });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
       
       if (data.success) {
         setOrders(data.data);
@@ -77,17 +69,9 @@ export const useOrderDetails = (orderId) => {
         return;
       }
       
-      const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
+      const { data } = await apiClient.get(`/orders/${orderId}`, {
+        headers: { Authorization: `Bearer ${token}` }
       });
-      
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
-      const data = await response.json();
       
       if (data.success) {
         setOrder(data.data);

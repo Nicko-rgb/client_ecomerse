@@ -4,23 +4,47 @@ import { Ionicons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import colors from '../../../theme/colors';
 import { useCart } from '../../../context/CartContext';
-import useProducts from '../../products/hooks/useProducts';
+import { apiClient } from '../../../config/api';
 
 export default function RecommendedProducts() {
   const navigation = useNavigation();
   const { addToCart, items: cartItems } = useCart();
-  const { products } = useProducts();
   const [recommendedProducts, setRecommendedProducts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Filtrar productos que NO están en el carrito
-    const cartProductIds = cartItems.map(item => item.id);
-    const filtered = products
-      .filter(product => !cartProductIds.includes(product.id))
-      .slice(0, 6); // Mostrar máximo 6 productos
-    
-    setRecommendedProducts(filtered);
-  }, [products, cartItems]);
+    const fetchRecommended = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const { data } = await apiClient.get('/products', { params: { random: true, limit: 5, page: 1 } });
+        if (data.success) {
+          const list = Array.isArray(data.data) ? data.data : [];
+          const cartIds = cartItems.map(item => item.id || item._id);
+          const normalized = list.map(p => ({
+            id: p.id,
+            title: p.name || p.title,
+            price: p.price,
+            image: (p.images && p.images[0]) || p.image || 'https://via.placeholder.com/300',
+            rating: p.rating || 4,
+            category: p.category,
+            description: p.description,
+            stock: p.stock
+          }));
+          const filtered = normalized.filter(product => !cartIds.includes(product.id)).slice(0, 5);
+          setRecommendedProducts(filtered);
+        } else {
+          setError('Error al cargar recomendados');
+        }
+      } catch (err) {
+        setError(err.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchRecommended();
+  }, [cartItems.length]);
 
   const handleAddToCart = (product) => {
     addToCart(product);
@@ -59,8 +83,20 @@ export default function RecommendedProducts() {
     </TouchableOpacity>
   );
 
+  if (loading) {
+    return (
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Ionicons name="sparkles" size={20} color={colors.primary} />
+          <Text style={styles.title}>También te puede gustar</Text>
+        </View>
+        <ActivityIndicator size="small" color={colors.primary} style={{ marginVertical: 8 }} />
+      </View>
+    );
+  }
+
   if (recommendedProducts.length === 0) {
-    return null; // No mostrar nada si no hay productos recomendados
+    return null;
   }
 
   return (
