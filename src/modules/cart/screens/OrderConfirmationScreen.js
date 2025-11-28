@@ -4,10 +4,12 @@ import { Ionicons } from '@expo/vector-icons';
 import colors from '../../../theme/colors';
 
 export default function OrderConfirmationScreen({ navigation, route }) {
-  const { orderNumber, total, estimatedDelivery } = route.params || {
+  const { orderNumber, total, estimatedDelivery, paymentMethod, paymentDetails } = route.params || {
     orderNumber: Math.floor(Math.random() * 1000000),
     total: 0,
-    estimatedDelivery: '3-5 días hábiles'
+    estimatedDelivery: '3-5 días hábiles',
+    paymentMethod: 'card',
+    paymentDetails: {}
   };
 
   const scaleAnim = useRef(new Animated.Value(0)).current;
@@ -67,6 +69,19 @@ export default function OrderConfirmationScreen({ navigation, route }) {
             <View style={styles.infoTextContainer}>
               <Text style={styles.infoLabel}>Total pagado</Text>
               <Text style={styles.infoValue}>${total.toFixed(2)}</Text>
+            </View>
+          </View>
+
+          <View style={styles.divider} />
+
+          <View style={styles.infoRow}>
+            <Ionicons name="card-outline" size={20} color={colors.primary} />
+            <View style={styles.infoTextContainer}>
+              <Text style={styles.infoLabel}>Método de pago</Text>
+              <Text style={styles.infoValue}>
+                {paymentDetails.type || 'Tarjeta'}
+                {paymentDetails.last4 && ` •••• ${paymentDetails.last4}`}
+              </Text>
             </View>
           </View>
 

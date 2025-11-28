@@ -79,6 +79,23 @@ export const checkoutStyles = StyleSheet.create({
     marginBottom: 12,
     fontStyle: 'italic',
   },
+  autofilledBanner: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: colors.success + '15',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 8,
+    marginBottom: 12,
+    borderWidth: 1,
+    borderColor: colors.success + '30',
+  },
+  autofilledText: {
+    fontSize: 13,
+    color: colors.success,
+    marginLeft: 6,
+    fontWeight: '600',
+  },
   row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
