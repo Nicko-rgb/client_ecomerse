@@ -79,7 +79,11 @@ const HelpScreen = ({ navigation }) => {
   };
 
   const handleReportProblem = () => {
-    navigation.navigate('ReportProblemScreen');
+    Alert.alert(
+      'Reportar Problema',
+      'Puedes contactarnos por:\n\n📧 Email: soporte@ecommerce.com\n📱 WhatsApp: +1234567890\n🌐 Web: www.ecommerce.com/soporte',
+      [{ text: 'OK' }]
+    );
   };
 
   const handleViewTerms = () => {
@@ -87,7 +91,7 @@ const HelpScreen = ({ navigation }) => {
   };
 
   const handleViewPrivacy = () => {
-    navigation.navigate('PrivacyScreen');
+    navigation.navigate('PrivacySettingsScreen');
   };
 
   return (

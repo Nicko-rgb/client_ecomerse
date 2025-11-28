@@ -8,13 +8,21 @@ import {
   Alert,
   RefreshControl,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useProfile } from '../hooks/useProfile';
 import AddressCard from '../components/AddressCard';
 import { colors } from '../../../theme/colors';
 
 const AddressesScreen = ({ navigation }) => {
-  const { addresses, loading, refreshAddresses } = useProfile();
+  const { addresses, loading, error, refreshAddresses, deleteAddress, updateAddress } = useProfile();
   const [refreshing, setRefreshing] = useState(false);
+
+  // Refrescar datos cuando la pantalla recibe foco
+  useFocusEffect(
+    React.useCallback(() => {
+      refreshAddresses();
+    }, [])
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -39,9 +47,13 @@ const AddressesScreen = ({ navigation }) => {
         { 
           text: 'Eliminar', 
           style: 'destructive', 
-          onPress: () => {
-            // Lógica para eliminar dirección
-            console.log('Eliminar dirección:', addressId);
+          onPress: async () => {
+            const result = await deleteAddress(addressId);
+            if (result.success) {
+              Alert.alert('Éxito', result.message);
+            } else {
+              Alert.alert('Error', result.error);
+            }
           }
         },
       ]
@@ -56,9 +68,13 @@ const AddressesScreen = ({ navigation }) => {
         { text: 'Cancelar', style: 'cancel' },
         { 
           text: 'Confirmar', 
-          onPress: () => {
-            // Lógica para establecer como principal
-            console.log('Establecer como principal:', addressId);
+          onPress: async () => {
+            const result = await updateAddress(addressId, { isPrimary: true });
+            if (result.success) {
+              Alert.alert('Éxito', result.message);
+            } else {
+              Alert.alert('Error', result.error);
+            }
           }
         },
       ]
@@ -83,7 +99,16 @@ const AddressesScreen = ({ navigation }) => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {addresses.length === 0 ? (
+        {error && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>Error: {error}</Text>
+            <TouchableOpacity style={styles.retryButton} onPress={onRefresh}>
+              <Text style={styles.retryButtonText}>Reintentar</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        
+        {addresses.length === 0 && !error ? (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyIcon}>📍</Text>
             <Text style={styles.emptyTitle}>No tienes direcciones guardadas</Text>
@@ -186,6 +211,30 @@ const styles = StyleSheet.create({
   },
   addressesList: {
     paddingBottom: 20,
+  },
+  errorContainer: {
+    backgroundColor: colors.white,
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  errorText: {
+    color: colors.error || '#FF6B6B',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  retryButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  retryButtonText: {
+    color: colors.white,
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 

@@ -68,7 +68,7 @@ export default function OrderConfirmationScreen({ navigation, route }) {
             <Ionicons name="cash-outline" size={20} color={colors.primary} />
             <View style={styles.infoTextContainer}>
               <Text style={styles.infoLabel}>Total pagado</Text>
-              <Text style={styles.infoValue}>${total.toFixed(2)}</Text>
+              <Text style={styles.infoValue}>${Number(total || 0).toFixed(2)}</Text>
             </View>
           </View>
 

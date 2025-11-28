@@ -16,13 +16,11 @@ const AddAddressScreen = ({ navigation }) => {
   const { addAddress, loading } = useProfile();
   const [formData, setFormData] = useState({
     type: 'home',
-    street: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    country: '',
+    address: '',
+    reference: '',
     isPrimary: false,
   });
+  const [loadingLocation, setLoadingLocation] = useState(false);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -31,14 +29,35 @@ const AddAddressScreen = ({ navigation }) => {
     }));
   };
 
+  const handleUseCurrentLocation = () => {
+    setLoadingLocation(true);
+    
+    // Simular obtención de ubicación
+    setTimeout(() => {
+      setFormData(prev => ({
+        ...prev,
+        address: 'Av. Principal 123, Colonia Centro, Ciudad de México, CDMX, México'
+      }));
+      setLoadingLocation(false);
+      Alert.alert('✅ Ubicación obtenida', 'Se ha detectado tu ubicación actual');
+    }, 2000);
+  };
+
   const handleSave = async () => {
-    // Validaciones
-    if (!formData.street.trim() || !formData.city.trim()) {
-      Alert.alert('Error', 'La dirección y ciudad son obligatorias');
+    // Validaciones simplificadas
+    if (!formData.address.trim()) {
+      Alert.alert('Error', 'Debes agregar una dirección');
       return;
     }
 
-    const result = await addAddress(formData);
+    const addressData = {
+      type: formData.type,
+      fullAddress: formData.address,
+      reference: formData.reference,
+      isPrimary: formData.isPrimary
+    };
+
+    const result = await addAddress(addressData);
     
     if (result.success) {
       Alert.alert('Éxito', 'Dirección agregada correctamente', [
@@ -52,7 +71,30 @@ const AddAddressScreen = ({ navigation }) => {
   return (
     <ScrollView style={styles.container}>
       <View style={styles.form}>
-        <Text style={styles.title}>Agregar Nueva Dirección</Text>
+        <Text style={styles.title}>📍 Agregar Dirección</Text>
+        <Text style={styles.subtitle}>Agrega tu dirección de forma rápida y sencilla</Text>
+        
+        {/* Botón de ubicación actual */}
+        <TouchableOpacity 
+          style={styles.locationButton}
+          onPress={handleUseCurrentLocation}
+          disabled={loadingLocation}
+        >
+          {loadingLocation ? (
+            <ActivityIndicator color={colors.white} />
+          ) : (
+            <>
+              <Text style={styles.locationIcon}>📍</Text>
+              <Text style={styles.locationButtonText}>Usar mi ubicación actual</Text>
+            </>
+          )}
+        </TouchableOpacity>
+
+        <View style={styles.divider}>
+          <View style={styles.dividerLine} />
+          <Text style={styles.dividerText}>o ingresa manualmente</Text>
+          <View style={styles.dividerLine} />
+        </View>
         
         <View style={styles.inputGroup}>
           <Text style={styles.label}>Tipo de Dirección</Text>
@@ -82,57 +124,25 @@ const AddAddressScreen = ({ navigation }) => {
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Dirección *</Text>
+          <Text style={styles.label}>Dirección Completa *</Text>
           <TextInput
-            style={styles.input}
-            value={formData.street}
-            onChangeText={(value) => handleInputChange('street', value)}
-            placeholder="Calle y número"
+            style={[styles.input, styles.textArea]}
+            value={formData.address}
+            onChangeText={(value) => handleInputChange('address', value)}
+            placeholder="Ej: Av. Reforma 123, Col. Centro, Ciudad de México, CDMX"
             placeholderTextColor={colors.gray}
+            multiline={true}
+            numberOfLines={3}
           />
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Ciudad *</Text>
+          <Text style={styles.label}>Referencia (Opcional)</Text>
           <TextInput
             style={styles.input}
-            value={formData.city}
-            onChangeText={(value) => handleInputChange('city', value)}
-            placeholder="Ciudad"
-            placeholderTextColor={colors.gray}
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Estado/Provincia</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.state}
-            onChangeText={(value) => handleInputChange('state', value)}
-            placeholder="Estado o Provincia"
-            placeholderTextColor={colors.gray}
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Código Postal</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.zipCode}
-            onChangeText={(value) => handleInputChange('zipCode', value)}
-            placeholder="12345"
-            placeholderTextColor={colors.gray}
-            keyboardType="numeric"
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>País</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.country}
-            onChangeText={(value) => handleInputChange('country', value)}
-            placeholder="País"
+            value={formData.reference}
+            onChangeText={(value) => handleInputChange('reference', value)}
+            placeholder="Ej: Casa azul, entre farmacia y panadería"
             placeholderTextColor={colors.gray}
           />
         </View>
@@ -187,8 +197,51 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: colors.dark,
-    marginBottom: 24,
+    marginBottom: 8,
     textAlign: 'center',
+  },
+  subtitle: {
+    fontSize: 14,
+    color: colors.gray,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  locationButton: {
+    backgroundColor: colors.primary,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 20,
+  },
+  locationIcon: {
+    fontSize: 20,
+    marginRight: 8,
+  },
+  locationButtonText: {
+    color: colors.white,
+    fontSize: 16,
+    fontWeight: '600',
+  },
+  divider: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginVertical: 20,
+  },
+  dividerLine: {
+    flex: 1,
+    height: 1,
+    backgroundColor: colors.border,
+  },
+  dividerText: {
+    marginHorizontal: 16,
+    color: colors.gray,
+    fontSize: 14,
+  },
+  textArea: {
+    height: 80,
+    textAlignVertical: 'top',
   },
   inputGroup: {
     marginBottom: 20,

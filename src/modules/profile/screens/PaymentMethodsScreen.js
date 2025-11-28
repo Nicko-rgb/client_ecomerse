@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -8,6 +8,7 @@ import {
   Alert,
   RefreshControl,
 } from 'react-native';
+import { useFocusEffect } from '@react-navigation/native';
 import { useProfile } from '../hooks/useProfile';
 import { colors } from '../../../theme/colors';
 
@@ -77,8 +78,15 @@ const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, onSetPrimary }) =>
 };
 
 const PaymentMethodsScreen = ({ navigation }) => {
-  const { paymentMethods, loading, refreshPaymentMethods } = useProfile();
+  const { paymentMethods, loading, error, refreshPaymentMethods, deletePaymentMethod, updatePaymentMethod } = useProfile();
   const [refreshing, setRefreshing] = useState(false);
+
+  // Refrescar datos cuando la pantalla recibe foco
+  useFocusEffect(
+    React.useCallback(() => {
+      refreshPaymentMethods();
+    }, [])
+  );
 
   const onRefresh = async () => {
     setRefreshing(true);
@@ -103,9 +111,13 @@ const PaymentMethodsScreen = ({ navigation }) => {
         { 
           text: 'Eliminar', 
           style: 'destructive', 
-          onPress: () => {
-            // Lógica para eliminar método de pago
-            console.log('Eliminar método de pago:', paymentMethodId);
+          onPress: async () => {
+            const result = await deletePaymentMethod(paymentMethodId);
+            if (result.success) {
+              Alert.alert('Éxito', result.message);
+            } else {
+              Alert.alert('Error', result.error);
+            }
           }
         },
       ]
@@ -120,9 +132,13 @@ const PaymentMethodsScreen = ({ navigation }) => {
         { text: 'Cancelar', style: 'cancel' },
         { 
           text: 'Confirmar', 
-          onPress: () => {
-            // Lógica para establecer como principal
-            console.log('Establecer como principal:', paymentMethodId);
+          onPress: async () => {
+            const result = await updatePaymentMethod(paymentMethodId, { isPrimary: true });
+            if (result.success) {
+              Alert.alert('Éxito', result.message);
+            } else {
+              Alert.alert('Error', result.error);
+            }
           }
         },
       ]
@@ -147,7 +163,16 @@ const PaymentMethodsScreen = ({ navigation }) => {
           <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
         }
       >
-        {paymentMethods.length === 0 ? (
+        {error && (
+          <View style={styles.errorContainer}>
+            <Text style={styles.errorText}>Error: {error}</Text>
+            <TouchableOpacity style={styles.retryButton} onPress={onRefresh}>
+              <Text style={styles.retryButtonText}>Reintentar</Text>
+            </TouchableOpacity>
+          </View>
+        )}
+        
+        {paymentMethods.length === 0 && !error ? (
           <View style={styles.emptyContainer}>
             <Text style={styles.emptyIcon}>💳</Text>
             <Text style={styles.emptyTitle}>No tienes métodos de pago guardados</Text>
@@ -330,6 +355,30 @@ const styles = StyleSheet.create({
   },
   paymentMethodsList: {
     paddingBottom: 20,
+  },
+  errorContainer: {
+    backgroundColor: colors.white,
+    padding: 16,
+    borderRadius: 8,
+    marginBottom: 16,
+    alignItems: 'center',
+  },
+  errorText: {
+    color: colors.error || '#FF6B6B',
+    fontSize: 14,
+    textAlign: 'center',
+    marginBottom: 12,
+  },
+  retryButton: {
+    backgroundColor: colors.primary,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 6,
+  },
+  retryButtonText: {
+    color: colors.white,
+    fontSize: 14,
+    fontWeight: '600',
   },
 });
 

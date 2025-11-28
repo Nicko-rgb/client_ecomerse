@@ -16,11 +16,8 @@ const EditAddressScreen = ({ navigation, route }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     type: 'home',
-    street: '',
-    city: '',
-    state: '',
-    zipCode: '',
-    country: '',
+    fullAddress: '',
+    reference: '',
     isPrimary: false,
   });
 
@@ -28,11 +25,8 @@ const EditAddressScreen = ({ navigation, route }) => {
     if (address) {
       setFormData({
         type: address.type || 'home',
-        street: address.street || '',
-        city: address.city || '',
-        state: address.state || '',
-        zipCode: address.zipCode || '',
-        country: address.country || '',
+        fullAddress: address.fullAddress || '',
+        reference: address.reference || '',
         isPrimary: address.isPrimary || false,
       });
     }
@@ -47,8 +41,8 @@ const EditAddressScreen = ({ navigation, route }) => {
 
   const handleSave = async () => {
     // Validaciones
-    if (!formData.street.trim() || !formData.city.trim()) {
-      Alert.alert('Error', 'La dirección y ciudad son obligatorias');
+    if (!formData.fullAddress.trim()) {
+      Alert.alert('Error', 'La dirección es obligatoria');
       return;
     }
 
@@ -120,57 +114,25 @@ const EditAddressScreen = ({ navigation, route }) => {
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Dirección *</Text>
+          <Text style={styles.label}>Dirección Completa *</Text>
           <TextInput
-            style={styles.input}
-            value={formData.street}
-            onChangeText={(value) => handleInputChange('street', value)}
-            placeholder="Calle y número"
+            style={[styles.input, styles.textArea]}
+            value={formData.fullAddress}
+            onChangeText={(value) => handleInputChange('fullAddress', value)}
+            placeholder="Ej: Av. Reforma 123, Col. Centro, Ciudad de México, CDMX"
             placeholderTextColor={colors.gray}
+            multiline={true}
+            numberOfLines={3}
           />
         </View>
 
         <View style={styles.inputGroup}>
-          <Text style={styles.label}>Ciudad *</Text>
+          <Text style={styles.label}>Referencia (Opcional)</Text>
           <TextInput
             style={styles.input}
-            value={formData.city}
-            onChangeText={(value) => handleInputChange('city', value)}
-            placeholder="Ciudad"
-            placeholderTextColor={colors.gray}
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Estado/Provincia</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.state}
-            onChangeText={(value) => handleInputChange('state', value)}
-            placeholder="Estado o Provincia"
-            placeholderTextColor={colors.gray}
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Código Postal</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.zipCode}
-            onChangeText={(value) => handleInputChange('zipCode', value)}
-            placeholder="12345"
-            placeholderTextColor={colors.gray}
-            keyboardType="numeric"
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>País</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.country}
-            onChangeText={(value) => handleInputChange('country', value)}
-            placeholder="País"
+            value={formData.reference}
+            onChangeText={(value) => handleInputChange('reference', value)}
+            placeholder="Ej: Casa azul, entre farmacia y panadería"
             placeholderTextColor={colors.gray}
           />
         </View>
@@ -252,6 +214,10 @@ const styles = StyleSheet.create({
     padding: 12,
     fontSize: 16,
     color: colors.dark,
+  },
+  textArea: {
+    height: 80,
+    textAlignVertical: 'top',
   },
   typeContainer: {
     flexDirection: 'row',
