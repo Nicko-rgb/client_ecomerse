@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { View, Animated, Easing } from 'react-native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { Ionicons } from '@expo/vector-icons';
@@ -63,8 +64,44 @@ function ProductosStack() {
 
 function MainTabs() {
   const { count } = useCart();
+  const flyX = useRef(new Animated.Value(0));
+  const flyY = useRef(new Animated.Value(0));
+  const [flyVisible, setFlyVisible] = useState(false);
+  const cartScale = useRef(new Animated.Value(1));
+  const cartIconRef = useRef(null);
+  const [cartIconPos, setCartIconPos] = useState({ x: 0, y: 0 });
+
+  useEffect(() => {
+    global.__startCartFly__ = (sx, sy) => {
+      if (!cartIconPos.x && !cartIconPos.y) return;
+      setFlyVisible(true);
+      flyX.current.setValue(sx);
+      flyY.current.setValue(sy);
+      Animated.parallel([
+        Animated.timing(flyX.current, { toValue: cartIconPos.x, duration: 600, easing: Easing.inOut(Easing.quad), useNativeDriver: false }),
+        Animated.timing(flyY.current, { toValue: cartIconPos.y, duration: 600, easing: Easing.inOut(Easing.quad), useNativeDriver: false }),
+      ]).start(() => {
+        setFlyVisible(false);
+        Animated.sequence([
+          Animated.timing(cartScale.current, { toValue: 1.2, duration: 120, useNativeDriver: true }),
+          Animated.timing(cartScale.current, { toValue: 1, duration: 120, useNativeDriver: true }),
+        ]).start();
+      });
+    };
+    return () => {
+      if (global.__startCartFly__ && typeof global.__startCartFly__ === 'function') delete global.__startCartFly__;
+    };
+  }, [cartIconPos.x, cartIconPos.y]);
+
   return (
-    <Tab.Navigator
+    <View style={{ flex: 1 }}>
+      {flyVisible && (
+        <Animated.View
+          pointerEvents="none"
+          style={{ position: 'absolute', width: 16, height: 16, borderRadius: 8, backgroundColor: colors.primary, left: flyX.current, top: flyY.current, zIndex: 999 }}
+        />
+      )}
+      <Tab.Navigator
       screenOptions={({ route }) => ({
         headerShown: false,
         tabBarActiveTintColor: colors.primary,
@@ -72,7 +109,21 @@ function MainTabs() {
         tabBarStyle: { height: 64 },
         tabBarIcon: ({ color, size }) => {
           if (route.name === 'Productos') return <Ionicons name="home" size={size} color={color} />;
-          if (route.name === 'Carrito') return <Ionicons name="cart" size={size} color={color} />;
+          if (route.name === 'Carrito') return (
+            <Animated.View
+              ref={cartIconRef}
+              onLayout={() => {
+                if (cartIconRef.current && cartIconRef.current.measureInWindow) {
+                  cartIconRef.current.measureInWindow((x, y, w, h) => {
+                    setCartIconPos({ x: x + w / 2, y: y + h / 2 });
+                  });
+                }
+              }}
+              style={{ transform: [{ scale: cartScale.current }] }}
+            >
+              <Ionicons name="cart" size={size} color={color} />
+            </Animated.View>
+          );
           return <Ionicons name="person" size={size} color={color} />;
         },
       })}
@@ -88,6 +139,7 @@ function MainTabs() {
       />
       <Tab.Screen name="Perfil" component={ProfileScreen} />
     </Tab.Navigator>
+    </View>
   );
 }
 

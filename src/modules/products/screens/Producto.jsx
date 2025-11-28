@@ -1,7 +1,8 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useState, useRef } from 'react';
 import { View, Text, Image, ScrollView, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import colors from '../../../theme/colors';
+import LottieView from 'lottie-react-native';
 import { fontNames } from '../../../theme/fonts';
 import { useCart } from '../../../context/CartContext';
 import { useProductDetails } from '../hooks/useProducts';
@@ -12,6 +13,7 @@ export default function Producto({ route, navigation }) {
     const { addToCart } = useCart();
     const { product, relatedProducts } = useProductDetails(initial.id);
     const [selected, setSelected] = useState(0);
+    const addBtnRef = useRef(null);
     const current = product || initial;
     const gallery = useMemo(() => {
         const arr = Array.isArray(current.images) && current.images.length ? current.images : [current.image];
@@ -64,7 +66,7 @@ export default function Producto({ route, navigation }) {
                         <Ionicons name="star" size={16} color={colors.yellow} />
                         <Ionicons name="star" size={16} color={colors.yellow} />
                     </View>
-                    <Text style={styles.ratingText}>4.5 | +456 vendidos(as)</Text>
+                    <Text style={styles.ratingText}>4.5 | +456 vendidos</Text>
                 </View>
                 <View style={styles.prices}>
                     {current.old_price != null && (
@@ -75,9 +77,35 @@ export default function Producto({ route, navigation }) {
             </View>
 
             <View style={styles.actionsRow}>
-                <Ionicons name="cart" size={24} color={colors.primary} />
-                <TouchableOpacity style={[styles.btn, styles.btnOutline]} onPress={() => addToCart(current)}>
-                    <Text style={[styles.btnText, { color: colors.primary }]}>Agregar a Carrito</Text>
+                <LottieView
+                    source={require('../../../../assets/lottie/ShoppingCart.json')}
+                    style={{ width: 40, height: 40, zIndex: 100 }}
+                    autoPlay
+                    loop
+                />
+                <TouchableOpacity
+                    ref={(ref) => { if (ref) addBtnRef.current = ref; }}
+                    style={[styles.btn, styles.btnOutline]}
+                    onPress={() => {
+                        if (addBtnRef.current && addBtnRef.current.measureInWindow) {
+                            addBtnRef.current.measureInWindow((x, y, w, h) => {
+                                if (global.__startCartFly__) global.__startCartFly__(x + w / 2, y + h / 2);
+                            });
+                        }
+                        const cartItem = {
+                            id: current.id,
+                            title: current.name || current.title,
+                            price: current.price,
+                            image: (Array.isArray(current.images) && current.images.length ? current.images[0] : current.image) || 'https://via.placeholder.com/300',
+                            rating: current.rating || 5,
+                            category: current.category,
+                            description: current.description,
+                            stock: current.stock
+                        };
+                        addToCart(cartItem);
+                    }}
+                >
+                    <Text style={[styles.btnText, { color: colors.primary }]}>Añadir a Carrito</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={[styles.btn, styles.btnFill]}>
                     <Text style={[styles.btnText, { color: '#fff' }]}>Comprar</Text>

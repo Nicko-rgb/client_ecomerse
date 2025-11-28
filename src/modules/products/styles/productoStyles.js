@@ -116,7 +116,7 @@ export default StyleSheet.create({
     actionsRow: {
         flexDirection: 'row',
         alignItems: 'center',
-        gap: 12,
+        gap: 10,
         marginTop: 5
     },
     btn: {

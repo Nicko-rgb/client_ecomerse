@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { View, Text, Image, TouchableOpacity } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 import { Ionicons } from '@expo/vector-icons';
@@ -8,6 +8,7 @@ import { useCart } from '../../../context/CartContext';
 export default function ProductCard({ product }) {
     const { addToCart } = useCart();
     const navigation = useNavigation();
+    const addBtnRef = useRef(null);
 
     // Adaptar campos de la API
     const productData = {
@@ -38,7 +39,15 @@ export default function ProductCard({ product }) {
                     <Text style={{ textAlign: 'center', color: '#fff', fontWeight: '700' }}>Buy Now</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    onPress={() => addToCart(productData)}
+                    ref={(ref) => { if (ref) addBtnRef.current = ref; }}
+                    onPress={() => {
+                        if (addBtnRef.current && addBtnRef.current.measureInWindow) {
+                            addBtnRef.current.measureInWindow((x, y, w, h) => {
+                                if (global.__startCartFly__) global.__startCartFly__(x + w / 2, y + h / 2);
+                            });
+                        }
+                        addToCart(productData);
+                    }}
                     style={{ flex: 1, backgroundColor: '#E9F6F1', paddingVertical: 8, borderRadius: 8 }}
                 >
                     <Text style={{ textAlign: 'center', color: colors.primary, fontWeight: '700' }}>Add to Cart</Text>
