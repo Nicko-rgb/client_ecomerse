@@ -17,6 +17,7 @@ const OrderCard = ({ order, onViewDetails }) => {
       case 'delivered': return colors.success;
       case 'shipped': return colors.primary;
       case 'processing': return colors.warning;
+      case 'pending': return colors.gray;
       case 'cancelled': return colors.error;
       default: return colors.gray;
     }
@@ -27,6 +28,7 @@ const OrderCard = ({ order, onViewDetails }) => {
       case 'delivered': return 'Entregado';
       case 'shipped': return 'Enviado';
       case 'processing': return 'Procesando';
+      case 'pending': return 'Pendiente';
       case 'cancelled': return 'Cancelado';
       default: return 'Desconocido';
     }
@@ -35,7 +37,7 @@ const OrderCard = ({ order, onViewDetails }) => {
   return (
     <TouchableOpacity style={styles.orderCard} onPress={() => onViewDetails(order)}>
       <View style={styles.orderHeader}>
-        <Text style={styles.orderNumber}>Pedido #{order.id}</Text>
+        <Text style={styles.orderNumber}>Pedido #{order._id || order.id}</Text>
         <View style={[styles.statusBadge, { backgroundColor: getStatusColor(order.status) }]}>
           <Text style={styles.statusText}>{getStatusLabel(order.status)}</Text>
         </View>
@@ -53,11 +55,11 @@ const OrderCard = ({ order, onViewDetails }) => {
         <Text style={styles.itemsCount}>
           {order.items?.length || 0} {order.items?.length === 1 ? 'producto' : 'productos'}
         </Text>
-        <Text style={styles.orderTotal}>${(order.totalAmount || order.total || 0).toFixed(2)}</Text>
+        <Text style={styles.orderTotal}>${Number(order.totalAmount || order.total || 0).toFixed(2)}</Text>
       </View>
       
       {order.items?.slice(0, 2).map((item, index) => (
-        <Text key={index} style={styles.itemName}>
+        <Text key={`${order._id || order.id}-item-${index}`} style={styles.itemName}>
           • {item.product?.name || item.name} (x{item.quantity})
         </Text>
       ))}
@@ -138,7 +140,7 @@ const OrderHistoryScreen = ({ navigation }) => {
           <View style={styles.ordersList}>
             {orders.map((order) => (
               <OrderCard
-                key={order.id}
+                key={order._id || order.id || `order-${Math.random()}`}
                 order={order}
                 onViewDetails={handleViewOrderDetails}
               />

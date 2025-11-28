@@ -20,7 +20,8 @@ export const useProfile = (userId) => {
       
       // Obtener token
       const token = await AsyncStorage.getItem('token');
-      const user = JSON.parse(await AsyncStorage.getItem('user'));
+      const userString = await AsyncStorage.getItem('user');
+      const user = userString ? JSON.parse(userString) : null;
       
       if (!token || !user) {
         setError('No autenticado');
@@ -63,8 +64,9 @@ export const useProfile = (userId) => {
       setError(null);
       
       const token = await AsyncStorage.getItem('token');
-      const user = JSON.parse(await AsyncStorage.getItem('user'));
-      const profileUserId = userId || user.id;
+      const userString = await AsyncStorage.getItem('user');
+      const user = userString ? JSON.parse(userString) : null;
+      const profileUserId = userId || (user ? user.id : null);
       
       const response = await fetch(`${API_BASE_URL}/profile/${profileUserId}`, {
         method: 'PUT',
@@ -99,7 +101,8 @@ export const useProfile = (userId) => {
   const fetchAddresses = async () => {
     try {
       const token = await AsyncStorage.getItem('token');
-      const user = JSON.parse(await AsyncStorage.getItem('user'));
+      const userString = await AsyncStorage.getItem('user');
+      const user = userString ? JSON.parse(userString) : null;
       
       // No hacer request si no hay usuario autenticado
       if (!token || !user) {
@@ -107,8 +110,9 @@ export const useProfile = (userId) => {
       }
       
       const profileUserId = userId || user.id;
+      const url = `${API_BASE_URL}/profile/${profileUserId}/addresses`;
       
-      const response = await fetch(`${API_BASE_URL}/profile/${profileUserId}/addresses`, {
+      const response = await fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`
         }
@@ -121,7 +125,7 @@ export const useProfile = (userId) => {
       const data = await response.json();
       
       if (data.success) {
-        setAddresses(data.data);
+        setAddresses(data.data || []);
       }
     } catch (err) {
       console.error('Error al cargar direcciones:', err);
@@ -133,11 +137,95 @@ export const useProfile = (userId) => {
   const addAddress = async (addressData) => {
     try {
       setLoading(true);
+      setError(null);
       
-      const response = await fetch(`${API_BASE_URL}/profile/${userId}/addresses`, {
+      const token = await AsyncStorage.getItem('token');
+      const userString = await AsyncStorage.getItem('user');
+      const user = userString ? JSON.parse(userString) : null;
+      
+      if (!token || !user) {
+        return { success: false, error: 'No autenticado' };
+      }
+      
+      const profileUserId = userId || user.id;
+      const url = `${API_BASE_URL}/profile/${profileUserId}/addresses`;
+      
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(addressData),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        await fetchAddresses(); // Recargar direcciones
+        return { success: true, message: data.message };
+      } else {
+        return { success: false, error: data.error || 'Error al agregar dirección' };
+      }
+    } catch (err) {
+      console.error('Error al agregar dirección:', err);
+      return { success: false, error: 'Error de conexión' };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Obtener métodos de pago
+  const fetchPaymentMethods = async () => {
+    try {
+      const token = await AsyncStorage.getItem('token');
+      const userString = await AsyncStorage.getItem('user');
+      const user = userString ? JSON.parse(userString) : null;
+      
+      // No hacer request si no hay usuario autenticado
+      if (!token || !user) {
+        return;
+      }
+      
+      const profileUserId = userId || user.id;
+      const url = `${API_BASE_URL}/profile/${profileUserId}/payment-methods`;
+      
+      const response = await fetch(url, {
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        setPaymentMethods(data.data || []);
+      }
+    } catch (err) {
+      console.error('Error al cargar métodos de pago:', err);
+      // No establecer error aquí para no afectar la UI principal
+    }
+  };
+
+  // Actualizar dirección
+  const updateAddress = async (addressId, addressData) => {
+    try {
+      setLoading(true);
+      
+      const token = await AsyncStorage.getItem('token');
+      const userString = await AsyncStorage.getItem('user');
+      const user = userString ? JSON.parse(userString) : null;
+      const profileUserId = userId || (user ? user.id : null);
+      
+      const response = await fetch(`${API_BASE_URL}/profile/${profileUserId}/addresses/${addressId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(addressData),
       });
@@ -151,43 +239,41 @@ export const useProfile = (userId) => {
         return { success: false, error: data.error };
       }
     } catch (err) {
-      return { success: false, error: 'Error al agregar dirección' };
+      return { success: false, error: 'Error al actualizar dirección' };
     } finally {
       setLoading(false);
     }
   };
 
-  // Obtener métodos de pago
-  const fetchPaymentMethods = async () => {
+  // Eliminar dirección
+  const deleteAddress = async (addressId) => {
     try {
+      setLoading(true);
+      
       const token = await AsyncStorage.getItem('token');
-      const user = JSON.parse(await AsyncStorage.getItem('user'));
+      const userString = await AsyncStorage.getItem('user');
+      const user = userString ? JSON.parse(userString) : null;
+      const profileUserId = userId || (user ? user.id : null);
       
-      // No hacer request si no hay usuario autenticado
-      if (!token || !user) {
-        return;
-      }
-      
-      const profileUserId = userId || user.id;
-      
-      const response = await fetch(`${API_BASE_URL}/profile/${profileUserId}/payment-methods`, {
+      const response = await fetch(`${API_BASE_URL}/profile/${profileUserId}/addresses/${addressId}`, {
+        method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${token}`
         }
       });
       
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-      
       const data = await response.json();
       
       if (data.success) {
-        setPaymentMethods(data.data);
+        await fetchAddresses(); // Recargar direcciones
+        return { success: true, message: data.message };
+      } else {
+        return { success: false, error: data.error };
       }
     } catch (err) {
-      console.error('Error al cargar métodos de pago:', err);
-      // No establecer error aquí para no afectar la UI principal
+      return { success: false, error: 'Error al eliminar dirección' };
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -195,11 +281,59 @@ export const useProfile = (userId) => {
   const addPaymentMethod = async (paymentData) => {
     try {
       setLoading(true);
+      setError(null);
       
-      const response = await fetch(`${API_BASE_URL}/profile/${userId}/payment-methods`, {
+      const token = await AsyncStorage.getItem('token');
+      const userString = await AsyncStorage.getItem('user');
+      const user = userString ? JSON.parse(userString) : null;
+      
+      if (!token || !user) {
+        return { success: false, error: 'No autenticado' };
+      }
+      
+      const profileUserId = userId || user.id;
+      const url = `${API_BASE_URL}/profile/${profileUserId}/payment-methods`;
+      
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(paymentData),
+      });
+      
+      const data = await response.json();
+      
+      if (response.ok && data.success) {
+        await fetchPaymentMethods(); // Recargar métodos de pago
+        return { success: true, message: data.message };
+      } else {
+        return { success: false, error: data.error || 'Error al agregar método de pago' };
+      }
+    } catch (err) {
+      console.error('Error al agregar método de pago:', err);
+      return { success: false, error: 'Error de conexión' };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Actualizar método de pago
+  const updatePaymentMethod = async (paymentMethodId, paymentData) => {
+    try {
+      setLoading(true);
+      
+      const token = await AsyncStorage.getItem('token');
+      const userString = await AsyncStorage.getItem('user');
+      const user = userString ? JSON.parse(userString) : null;
+      const profileUserId = userId || (user ? user.id : null);
+      
+      const response = await fetch(`${API_BASE_URL}/profile/${profileUserId}/payment-methods/${paymentMethodId}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify(paymentData),
       });
@@ -213,7 +347,39 @@ export const useProfile = (userId) => {
         return { success: false, error: data.error };
       }
     } catch (err) {
-      return { success: false, error: 'Error al agregar método de pago' };
+      return { success: false, error: 'Error al actualizar método de pago' };
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Eliminar método de pago
+  const deletePaymentMethod = async (paymentMethodId) => {
+    try {
+      setLoading(true);
+      
+      const token = await AsyncStorage.getItem('token');
+      const userString = await AsyncStorage.getItem('user');
+      const user = userString ? JSON.parse(userString) : null;
+      const profileUserId = userId || (user ? user.id : null);
+      
+      const response = await fetch(`${API_BASE_URL}/profile/${profileUserId}/payment-methods/${paymentMethodId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+      
+      const data = await response.json();
+      
+      if (data.success) {
+        await fetchPaymentMethods(); // Recargar métodos de pago
+        return { success: true, message: data.message };
+      } else {
+        return { success: false, error: data.error };
+      }
+    } catch (err) {
+      return { success: false, error: 'Error al eliminar método de pago' };
     } finally {
       setLoading(false);
     }
@@ -235,6 +401,17 @@ export const useProfile = (userId) => {
     loadData();
   }, [userId]);
 
+  // Agregar listener para refrescar cuando la pantalla recibe foco
+  useEffect(() => {
+    const refreshData = () => {
+      fetchAddresses();
+      fetchPaymentMethods();
+    };
+    
+    // Refrescar datos cada vez que el hook se use
+    refreshData();
+  }, []);
+
   return {
     profile,
     addresses,
@@ -243,7 +420,11 @@ export const useProfile = (userId) => {
     error,
     updateProfile,
     addAddress,
+    updateAddress,
+    deleteAddress,
     addPaymentMethod,
+    updatePaymentMethod,
+    deletePaymentMethod,
     refreshProfile: fetchProfile,
     refreshAddresses: fetchAddresses,
     refreshPaymentMethods: fetchPaymentMethods,

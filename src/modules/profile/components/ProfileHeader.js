@@ -39,11 +39,9 @@ const ProfileHeader = ({ profile, onEditPress }) => {
   const handleChangeAvatar = () => {
     Alert.alert(
       'Cambiar Foto de Perfil',
-      'Selecciona una opción',
+      'Esta funcionalidad estará disponible pronto. Por ahora puedes disfrutar de tu avatar personalizado con iniciales.',
       [
-        { text: 'Tomar Foto', onPress: () => console.log('Tomar foto') },
-        { text: 'Elegir de Galería', onPress: () => console.log('Galería') },
-        { text: 'Cancelar', style: 'cancel' }
+        { text: 'OK' }
       ]
     );
   };

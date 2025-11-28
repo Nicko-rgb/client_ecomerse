@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   View,
   Text,
-  TextInput,
   TouchableOpacity,
   ScrollView,
   StyleSheet,
@@ -14,212 +13,138 @@ import { colors } from '../../../theme/colors';
 
 const AddPaymentMethodScreen = ({ navigation }) => {
   const { addPaymentMethod, loading } = useProfile();
-  const [formData, setFormData] = useState({
-    type: 'credit_card',
-    cardNumber: '',
-    cardHolder: '',
-    expiryDate: '',
-    cvv: '',
-    isPrimary: false,
-  });
+  const [selectedMethod, setSelectedMethod] = useState(null);
 
-  const handleInputChange = (field, value) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value
-    }));
-  };
-
-  const formatCardNumber = (value) => {
-    // Remover espacios y caracteres no numéricos
-    const cleaned = value.replace(/\D/g, '');
-    // Agregar espacios cada 4 dígitos
-    const formatted = cleaned.replace(/(\d{4})(?=\d)/g, '$1 ');
-    return formatted.substring(0, 19); // Máximo 16 dígitos + 3 espacios
-  };
-
-  const formatExpiryDate = (value) => {
-    // Remover caracteres no numéricos
-    const cleaned = value.replace(/\D/g, '');
-    // Agregar slash después de 2 dígitos
-    if (cleaned.length >= 2) {
-      return cleaned.substring(0, 2) + '/' + cleaned.substring(2, 4);
+  const paymentMethods = [
+    {
+      id: 'credit_card',
+      title: '💳 Tarjeta de Crédito/Débito',
+      subtitle: 'Visa, Mastercard, American Express',
+      popular: true
+    },
+    {
+      id: 'paypal',
+      title: '🅿️ PayPal',
+      subtitle: 'Paga con tu cuenta de PayPal',
+      popular: true
+    },
+    {
+      id: 'apple_pay',
+      title: '📱 Apple Pay',
+      subtitle: 'Pago rápido y seguro con Face ID',
+      popular: false
+    },
+    {
+      id: 'google_pay',
+      title: '🟢 Google Pay',
+      subtitle: 'Pago rápido con tu cuenta Google',
+      popular: false
+    },
+    {
+      id: 'bank_transfer',
+      title: '🏦 Transferencia Bancaria',
+      subtitle: 'Pago directo desde tu banco',
+      popular: false
     }
-    return cleaned;
+  ];
+
+  const handleSelectMethod = (methodId) => {
+    setSelectedMethod(methodId);
   };
 
-  const handleCardNumberChange = (value) => {
-    const formatted = formatCardNumber(value);
-    handleInputChange('cardNumber', formatted);
-  };
-
-  const handleExpiryDateChange = (value) => {
-    const formatted = formatExpiryDate(value);
-    handleInputChange('expiryDate', formatted);
-  };
-
-  const validateForm = () => {
-    if (!formData.cardNumber.replace(/\s/g, '') || formData.cardNumber.replace(/\s/g, '').length < 16) {
-      Alert.alert('Error', 'Número de tarjeta inválido');
-      return false;
+  const handleContinue = async () => {
+    if (!selectedMethod) {
+      Alert.alert('Selecciona un método', 'Por favor selecciona un método de pago');
+      return;
     }
-    
-    if (!formData.cardHolder.trim()) {
-      Alert.alert('Error', 'El nombre del titular es obligatorio');
-      return false;
-    }
-    
-    if (!formData.expiryDate || formData.expiryDate.length < 5) {
-      Alert.alert('Error', 'Fecha de vencimiento inválida');
-      return false;
-    }
-    
-    if (!formData.cvv || formData.cvv.length < 3) {
-      Alert.alert('Error', 'CVV inválido');
-      return false;
-    }
-    
-    return true;
-  };
 
-  const handleSave = async () => {
-    if (!validateForm()) return;
-
-    // Enmascarar número de tarjeta para guardar
-    const maskedCardNumber = '**** **** **** ' + formData.cardNumber.slice(-4);
+    const method = paymentMethods.find(m => m.id === selectedMethod);
     
+    // Crear datos del método de pago
     const paymentMethodData = {
-      ...formData,
-      cardNumber: maskedCardNumber,
+      type: selectedMethod,
+      title: method.title,
+      cardNumber: selectedMethod === 'credit_card' ? '**** **** **** 0000' : 
+                  selectedMethod === 'paypal' ? 'usuario@ejemplo.com' : '',
+      cardHolder: selectedMethod === 'credit_card' ? 'USUARIO EJEMPLO' : 
+                  selectedMethod === 'paypal' ? 'Usuario Ejemplo' : '',
+      expiryDate: selectedMethod === 'credit_card' ? '12/28' : '',
+      isPrimary: false
     };
-
+    
     const result = await addPaymentMethod(paymentMethodData);
     
     if (result.success) {
-      Alert.alert('Éxito', 'Método de pago agregado correctamente', [
+      Alert.alert('Éxito', result.message || 'Método de pago agregado correctamente', [
         { text: 'OK', onPress: () => navigation.goBack() }
       ]);
     } else {
-      Alert.alert('Error', result.error || 'Error al agregar el método de pago');
+      Alert.alert('Error', result.error || 'No se pudo agregar el método de pago');
     }
   };
 
   return (
     <ScrollView style={styles.container}>
       <View style={styles.form}>
-        <Text style={styles.title}>Agregar Método de Pago</Text>
+        <Text style={styles.title}>💳 Agregar Método de Pago</Text>
+        <Text style={styles.subtitle}>Selecciona tu método de pago preferido</Text>
         
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Tipo de Tarjeta</Text>
-          <View style={styles.typeContainer}>
-            {[
-              { key: 'credit_card', label: '💳 Crédito' },
-              { key: 'debit_card', label: '💳 Débito' },
-            ].map((type) => (
-              <TouchableOpacity
-                key={type.key}
-                style={[
-                  styles.typeOption,
-                  formData.type === type.key && styles.typeOptionSelected
-                ]}
-                onPress={() => handleInputChange('type', type.key)}
-              >
-                <Text style={[
-                  styles.typeText,
-                  formData.type === type.key && styles.typeTextSelected
-                ]}>
-                  {type.label}
-                </Text>
-              </TouchableOpacity>
-            ))}
-          </View>
+        <View style={styles.methodsList}>
+          {paymentMethods.map((method) => (
+            <TouchableOpacity
+              key={method.id}
+              style={[
+                styles.methodCard,
+                selectedMethod === method.id && styles.methodCardSelected,
+                method.popular && styles.methodCardPopular
+              ]}
+              onPress={() => handleSelectMethod(method.id)}
+            >
+              {method.popular && (
+                <View style={styles.popularBadge}>
+                  <Text style={styles.popularText}>Popular</Text>
+                </View>
+              )}
+              
+              <View style={styles.methodContent}>
+                <Text style={styles.methodTitle}>{method.title}</Text>
+                <Text style={styles.methodSubtitle}>{method.subtitle}</Text>
+              </View>
+              
+              <View style={[
+                styles.radioButton,
+                selectedMethod === method.id && styles.radioButtonSelected
+              ]}>
+                {selectedMethod === method.id && (
+                  <View style={styles.radioButtonInner} />
+                )}
+              </View>
+            </TouchableOpacity>
+          ))}
         </View>
 
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Número de Tarjeta *</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.cardNumber}
-            onChangeText={handleCardNumberChange}
-            placeholder="1234 5678 9012 3456"
-            placeholderTextColor={colors.gray}
-            keyboardType="numeric"
-            maxLength={19}
-          />
-        </View>
-
-        <View style={styles.inputGroup}>
-          <Text style={styles.label}>Nombre del Titular *</Text>
-          <TextInput
-            style={styles.input}
-            value={formData.cardHolder}
-            onChangeText={(value) => handleInputChange('cardHolder', value.toUpperCase())}
-            placeholder="JUAN PÉREZ"
-            placeholderTextColor={colors.gray}
-            autoCapitalize="characters"
-          />
-        </View>
-
-        <View style={styles.rowContainer}>
-          <View style={[styles.inputGroup, styles.halfWidth]}>
-            <Text style={styles.label}>Vencimiento *</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.expiryDate}
-              onChangeText={handleExpiryDateChange}
-              placeholder="MM/AA"
-              placeholderTextColor={colors.gray}
-              keyboardType="numeric"
-              maxLength={5}
-            />
-          </View>
-
-          <View style={[styles.inputGroup, styles.halfWidth]}>
-            <Text style={styles.label}>CVV *</Text>
-            <TextInput
-              style={styles.input}
-              value={formData.cvv}
-              onChangeText={(value) => handleInputChange('cvv', value.replace(/\D/g, ''))}
-              placeholder="123"
-              placeholderTextColor={colors.gray}
-              keyboardType="numeric"
-              maxLength={4}
-              secureTextEntry
-            />
-          </View>
-        </View>
-
-        <View style={styles.checkboxContainer}>
-          <TouchableOpacity
-            style={styles.checkbox}
-            onPress={() => handleInputChange('isPrimary', !formData.isPrimary)}
-          >
-            <View style={[
-              styles.checkboxBox,
-              formData.isPrimary && styles.checkboxBoxChecked
-            ]}>
-              {formData.isPrimary && <Text style={styles.checkboxCheck}>✓</Text>}
-            </View>
-            <Text style={styles.checkboxLabel}>Establecer como método principal</Text>
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.securityNote}>
-          <Text style={styles.securityIcon}>🔒</Text>
-          <Text style={styles.securityText}>
-            Tu información está protegida con encriptación de nivel bancario
+        <View style={styles.infoBox}>
+          <Text style={styles.infoTitle}>🔒 Pago Seguro</Text>
+          <Text style={styles.infoText}>
+            Todos los métodos de pago están protegidos con encriptación de nivel bancario.
           </Text>
         </View>
 
         <TouchableOpacity 
-          style={[styles.saveButton, loading && styles.saveButtonDisabled]}
-          onPress={handleSave}
-          disabled={loading}
+          style={[
+            styles.continueButton, 
+            !selectedMethod && styles.continueButtonDisabled,
+            loading && styles.continueButtonDisabled
+          ]}
+          onPress={handleContinue}
+          disabled={!selectedMethod || loading}
         >
           {loading ? (
             <ActivityIndicator color={colors.white} />
           ) : (
-            <Text style={styles.saveButtonText}>Guardar Método de Pago</Text>
+            <Text style={styles.continueButtonText}>
+              {selectedMethod ? 'Continuar' : 'Selecciona un método'}
+            </Text>
           )}
         </TouchableOpacity>
 
@@ -246,118 +171,109 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: 'bold',
     color: colors.dark,
-    marginBottom: 24,
+    marginBottom: 8,
     textAlign: 'center',
   },
-  inputGroup: {
+  subtitle: {
+    fontSize: 14,
+    color: colors.gray,
+    textAlign: 'center',
+    marginBottom: 24,
+  },
+  methodsList: {
     marginBottom: 20,
   },
-  label: {
+  methodCard: {
+    backgroundColor: colors.white,
+    borderRadius: 12,
+    padding: 16,
+    marginBottom: 12,
+    borderWidth: 2,
+    borderColor: colors.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+    position: 'relative',
+  },
+  methodCardSelected: {
+    borderColor: colors.primary,
+    backgroundColor: '#E8F5E8',
+  },
+  methodCardPopular: {
+    borderColor: colors.primary,
+  },
+  popularBadge: {
+    position: 'absolute',
+    top: -8,
+    right: 12,
+    backgroundColor: colors.primary,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 10,
+  },
+  popularText: {
+    color: colors.white,
+    fontSize: 10,
+    fontWeight: '600',
+  },
+  methodContent: {
+    flex: 1,
+  },
+  methodTitle: {
+    fontSize: 16,
+    fontWeight: '600',
+    color: colors.dark,
+    marginBottom: 4,
+  },
+  methodSubtitle: {
+    fontSize: 14,
+    color: colors.gray,
+  },
+  radioButton: {
+    width: 24,
+    height: 24,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: colors.border,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  radioButtonSelected: {
+    borderColor: colors.primary,
+  },
+  radioButtonInner: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    backgroundColor: colors.primary,
+  },
+  infoBox: {
+    backgroundColor: '#F0F9FF',
+    padding: 16,
+    borderRadius: 12,
+    marginBottom: 24,
+  },
+  infoTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: colors.dark,
     marginBottom: 8,
   },
-  input: {
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    padding: 12,
-    fontSize: 16,
-    color: colors.dark,
-  },
-  typeContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  typeOption: {
-    flex: 1,
-    backgroundColor: colors.white,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    padding: 12,
-    marginHorizontal: 4,
-    alignItems: 'center',
-  },
-  typeOptionSelected: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  typeText: {
-    fontSize: 14,
-    color: colors.dark,
-  },
-  typeTextSelected: {
-    color: colors.white,
-    fontWeight: '600',
-  },
-  rowContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-  },
-  halfWidth: {
-    width: '48%',
-  },
-  checkboxContainer: {
-    marginBottom: 20,
-  },
-  checkbox: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  checkboxBox: {
-    width: 24,
-    height: 24,
-    borderWidth: 2,
-    borderColor: colors.border,
-    borderRadius: 4,
-    marginRight: 12,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  checkboxBoxChecked: {
-    backgroundColor: colors.primary,
-    borderColor: colors.primary,
-  },
-  checkboxCheck: {
-    color: colors.white,
-    fontSize: 16,
-    fontWeight: 'bold',
-  },
-  checkboxLabel: {
-    fontSize: 16,
-    color: colors.dark,
-  },
-  securityNote: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: colors.lightBackground,
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 20,
-  },
-  securityIcon: {
-    fontSize: 16,
-    marginRight: 8,
-  },
-  securityText: {
+  infoText: {
     fontSize: 14,
     color: colors.gray,
-    flex: 1,
+    lineHeight: 20,
   },
-  saveButton: {
+  continueButton: {
     backgroundColor: colors.primary,
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 16,
     alignItems: 'center',
-    marginTop: 20,
+    marginBottom: 12,
   },
-  saveButtonDisabled: {
+  continueButtonDisabled: {
     opacity: 0.6,
   },
-  saveButtonText: {
+  continueButtonText: {
     color: colors.white,
     fontSize: 16,
     fontWeight: '600',
@@ -366,10 +282,9 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent',
     borderWidth: 1,
     borderColor: colors.gray,
-    borderRadius: 8,
+    borderRadius: 12,
     padding: 16,
     alignItems: 'center',
-    marginTop: 12,
   },
   cancelButtonText: {
     color: colors.gray,

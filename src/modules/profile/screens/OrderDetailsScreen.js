@@ -6,6 +6,7 @@ import {
   StyleSheet,
   TouchableOpacity,
   Alert,
+  Image,
 } from 'react-native';
 import { colors } from '../../../theme/colors';
 
@@ -17,6 +18,7 @@ const OrderDetailsScreen = ({ navigation, route }) => {
       case 'delivered': return colors.success;
       case 'shipped': return colors.primary;
       case 'processing': return colors.warning;
+      case 'pending': return colors.gray;
       case 'cancelled': return colors.error;
       default: return colors.gray;
     }
@@ -27,6 +29,7 @@ const OrderDetailsScreen = ({ navigation, route }) => {
       case 'delivered': return 'Entregado';
       case 'shipped': return 'Enviado';
       case 'processing': return 'Procesando';
+      case 'pending': return 'Pendiente';
       case 'cancelled': return 'Cancelado';
       default: return 'Desconocido';
     }
@@ -91,8 +94,13 @@ const OrderDetailsScreen = ({ navigation, route }) => {
         <View style={styles.itemsContainer}>
           {order.items.map((item, index) => (
             <View key={index} style={styles.itemCard}>
+              <Image 
+                source={{ uri: item.product?.image || item.image || 'https://via.placeholder.com/60x60?text=No+Image' }}
+                style={styles.itemImage}
+                resizeMode="cover"
+              />
               <View style={styles.itemInfo}>
-                <Text style={styles.itemName}>{item.name}</Text>
+                <Text style={styles.itemName}>{item.product?.name || item.name}</Text>
                 <Text style={styles.itemQuantity}>Cantidad: {item.quantity}</Text>
                 <Text style={styles.itemPrice}>${(item.price || 25.99).toFixed(2)} c/u</Text>
               </View>
@@ -110,19 +118,19 @@ const OrderDetailsScreen = ({ navigation, route }) => {
         <View style={styles.summaryContainer}>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Subtotal</Text>
-            <Text style={styles.summaryValue}>${(order.total * 0.85).toFixed(2)}</Text>
+            <Text style={styles.summaryValue}>${((order.totalAmount || order.total || 0) * 0.85).toFixed(2)}</Text>
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Envío</Text>
-            <Text style={styles.summaryValue}>${(order.total * 0.1).toFixed(2)}</Text>
+            <Text style={styles.summaryValue}>${((order.totalAmount || order.total || 0) * 0.1).toFixed(2)}</Text>
           </View>
           <View style={styles.summaryRow}>
             <Text style={styles.summaryLabel}>Impuestos</Text>
-            <Text style={styles.summaryValue}>${(order.total * 0.05).toFixed(2)}</Text>
+            <Text style={styles.summaryValue}>${((order.totalAmount || order.total || 0) * 0.05).toFixed(2)}</Text>
           </View>
           <View style={[styles.summaryRow, styles.totalRow]}>
             <Text style={styles.totalLabel}>Total</Text>
-            <Text style={styles.totalValue}>${order.total.toFixed(2)}</Text>
+            <Text style={styles.totalValue}>${(order.totalAmount || order.total || 0).toFixed(2)}</Text>
           </View>
         </View>
       </View>
@@ -238,6 +246,13 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: colors.lightGray,
+  },
+  itemImage: {
+    width: 60,
+    height: 60,
+    borderRadius: 8,
+    marginRight: 12,
+    backgroundColor: colors.lightGray,
   },
   itemInfo: {
     flex: 1,
