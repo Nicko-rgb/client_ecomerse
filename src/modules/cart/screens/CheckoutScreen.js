@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -11,12 +11,14 @@ import {
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useCart } from '../../../context/CartContext';
+import { useAuth } from '../../../context/AuthContext';
 import OrderSummaryExpandable from '../components/OrderSummaryExpandable';
 import { checkoutStyles } from '../styles/checkoutStyles';
 import colors from '../../../theme/colors';
 
 export default function CheckoutScreen({ navigation }) {
   const { items, getSubtotal, clearCart } = useCart();
+  const { user } = useAuth();
   
   const [selectedPayment, setSelectedPayment] = useState('card');
   const [cardNumber, setCardNumber] = useState('');
@@ -33,6 +35,23 @@ export default function CheckoutScreen({ navigation }) {
   });
   
   const [deliveryNotes, setDeliveryNotes] = useState('');
+
+  // Autocompletar datos del usuario al cargar
+  useEffect(() => {
+    if (user) {
+      setShippingAddress(prev => ({
+        ...prev,
+        fullName: `${user.firstName || ''} ${user.lastName || ''}`.trim() || prev.fullName,
+        phone: user.phone || prev.phone,
+      }));
+      
+      // Si el usuario tiene nombre, también autocompletar el nombre en la tarjeta
+      const fullName = `${user.firstName || ''} ${user.lastName || ''}`.trim();
+      if (fullName) {
+        setCardName(fullName);
+      }
+    }
+  }, [user]);
 
   const subtotal = getSubtotal();
   const shipping = 5.00;
@@ -75,19 +94,142 @@ export default function CheckoutScreen({ navigation }) {
     return true;
   };
 
-  const navigateToConfirmation = () => {
+  const getPaymentDetails = (method) => {
+    switch(method) {
+      case 'card':
+        return {
+          type: 'Tarjeta de Crédito/Débito',
+          last4: cardNumber.replace(/\s/g, '').slice(-4),
+          cardHolder: cardName
+        };
+      case 'paypal':
+        return {
+          type: 'PayPal',
+          email: user?.email || 'usuario@email.com'
+        };
+      case 'cash':
+        return {
+          type: 'Efectivo',
+          message: 'Pago contra entrega'
+        };
+      default:
+        return {};
+    }
+  };
+
+  const navigateToConfirmation = (paymentMethod) => {
     const orderNumber = Math.floor(Math.random() * 1000000);
     clearCart();
     navigation.replace('OrderConfirmation', {
       orderNumber,
       total,
-      estimatedDelivery: '3-5 días hábiles'
+      estimatedDelivery: '3-5 días hábiles',
+      paymentMethod: paymentMethod,
+      paymentDetails: getPaymentDetails(paymentMethod)
     });
+  };
+
+  const handleCardPayment = () => {
+    Alert.alert(
+      'Procesando Pago',
+      'Verificando datos de la tarjeta...',
+      [],
+      { cancelable: false }
+    );
+
+    setTimeout(() => {
+      Alert.alert(
+        '¡Pago Exitoso!',
+        `Tu tarjeta terminada en ${cardNumber.slice(-4)} ha sido cargada exitosamente.\n\nMonto: $${total.toFixed(2)}`,
+        [
+          {
+            text: 'Ver Detalles',
+            onPress: () => navigateToConfirmation('card')
+          }
+        ]
+      );
+    }, 1500);
+  };
+
+  const handlePayPalPayment = () => {
+    Alert.alert(
+      'Redirigiendo a PayPal',
+      'Serás redirigido a PayPal para completar el pago de forma segura.',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel'
+        },
+        {
+          text: 'Continuar',
+          onPress: () => {
+            Alert.alert(
+              'Simulación PayPal',
+              'En una app real, aquí se abriría PayPal.\n\n¿Confirmar pago simulado?',
+              [
+                {
+                  text: 'Cancelar',
+                  style: 'cancel'
+                },
+                {
+                  text: 'Pagar',
+                  onPress: () => {
+                    Alert.alert(
+                      '¡Pago Completado!',
+                      `PayPal ha procesado tu pago de $${total.toFixed(2)} exitosamente.`,
+                      [
+                        {
+                          text: 'Ver Detalles',
+                          onPress: () => navigateToConfirmation('paypal')
+                        }
+                      ]
+                    );
+                  }
+                }
+              ]
+            );
+          }
+        }
+      ]
+    );
+  };
+
+  const handleCashPayment = () => {
+    Alert.alert(
+      'Confirmar Pedido',
+      `Pagarás $${total.toFixed(2)} en efectivo al recibir tu pedido.\n\n¿Confirmar pedido?`,
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel'
+        },
+        {
+          text: 'Confirmar',
+          onPress: () => {
+            Alert.alert(
+              '¡Pedido Confirmado!',
+              'Tu pedido ha sido registrado. Prepara el efectivo para cuando llegue el repartidor.',
+              [
+                {
+                  text: 'Ver Detalles',
+                  onPress: () => navigateToConfirmation('cash')
+                }
+              ]
+            );
+          }
+        }
+      ]
+    );
   };
 
   const handlePlaceOrder = () => {
     if (!validateForm()) return;
+    
+    // Navegar directamente a confirmación con el método de pago seleccionado
+    navigateToConfirmation(selectedPayment);
+  };
 
+  const oldAlert = () => {
     Alert.alert(
       '¡Pedido Confirmado!',
       `Tu pedido por $${total.toFixed(2)} ha sido procesado exitosamente.\n\nRecibirás un correo de confirmación pronto.`,
@@ -108,7 +250,7 @@ export default function CheckoutScreen({ navigation }) {
         }
       ]
     );
-  };
+  }; // Función vieja - no se usa más
 
   return (
     <View style={checkoutStyles.container}>
@@ -138,6 +280,14 @@ export default function CheckoutScreen({ navigation }) {
           <Text style={checkoutStyles.sectionTitle}>
             <Ionicons name="location" size={20} color={colors.primary} /> Dirección de Envío
           </Text>
+          {user && (shippingAddress.fullName || shippingAddress.phone) && (
+            <View style={checkoutStyles.autofilledBanner}>
+              <Ionicons name="checkmark-circle" size={16} color={colors.success} />
+              <Text style={checkoutStyles.autofilledText}>
+                Datos autocompletados desde tu perfil
+              </Text>
+            </View>
+          )}
           <View style={checkoutStyles.card}>
             <TextInput
               style={checkoutStyles.input}
@@ -329,11 +479,7 @@ export default function CheckoutScreen({ navigation }) {
       <View style={checkoutStyles.footer}>
         <TouchableOpacity 
           style={checkoutStyles.placeOrderButton}
-          onPress={() => {
-            if (validateForm()) {
-              navigateToConfirmation();
-            }
-          }}
+          onPress={handlePlaceOrder}
         >
           <Text style={checkoutStyles.placeOrderText}>
             Confirmar Pedido - ${total.toFixed(2)}
