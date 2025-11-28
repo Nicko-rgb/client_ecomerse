@@ -18,6 +18,11 @@ export default function Producto({ route, navigation }) {
         return arr.slice(0, 4);
     }, [current]);
 
+    const handleBuyNow = () => {
+        addToCart(current);
+        navigation.navigate('Checkout');
+    };
+
     return (
         <ScrollView style={styles.container} contentContainerStyle={{ paddingBottom: 24 }} showsHorizontalScrollIndicator={false} showsVerticalScrollIndicator={false}>
 
@@ -79,7 +84,7 @@ export default function Producto({ route, navigation }) {
                 <TouchableOpacity style={[styles.btn, styles.btnOutline]} onPress={() => addToCart(current)}>
                     <Text style={[styles.btnText, { color: colors.primary }]}>Agregar a Carrito</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.btn, styles.btnFill]}>
+                <TouchableOpacity style={[styles.btn, styles.btnFill]} onPress={handleBuyNow}>
                     <Text style={[styles.btnText, { color: '#fff' }]}>Comprar</Text>
                 </TouchableOpacity>
             </View>

@@ -8,6 +8,9 @@ import CartSummary from '../components/CartSummary';
 import ProductDetailModal from '../components/ProductDetailModal';
 import FreeShippingProgress from '../components/FreeShippingProgress';
 import RecommendedProducts from '../components/RecommendedProducts';
+import DeliveryEstimate from '../components/DeliveryEstimate';
+import PaymentMethods from '../components/PaymentMethods';
+import CartActions from '../components/CartActions';
 import { cartStyles } from '../styles/cartStyles';
 
 export default function CartScreen({ navigation }) {
@@ -67,6 +70,21 @@ export default function CartScreen({ navigation }) {
     );
   }
 
+  const ListHeaderComponent = () => (
+    <>
+      <FreeShippingProgress subtotal={subtotal} />
+    </>
+  );
+
+  const ListFooterComponent = () => (
+    <>
+      <PaymentMethods />
+      <DeliveryEstimate />
+      <CartActions onClearCart={clearCart} items={items} />
+      <RecommendedProducts />
+    </>
+  );
+
   return (
     <View style={cartStyles.container}>
       <View style={cartStyles.header}>
@@ -80,8 +98,8 @@ export default function CartScreen({ navigation }) {
         data={items}
         keyExtractor={(item) => item.id.toString()}
         contentContainerStyle={cartStyles.listContent}
-        ListHeaderComponent={<FreeShippingProgress subtotal={subtotal} />}
-        ListFooterComponent={<RecommendedProducts />}
+        ListHeaderComponent={ListHeaderComponent}
+        ListFooterComponent={ListFooterComponent}
         renderItem={({ item }) => (
           <CartItem
             item={item}

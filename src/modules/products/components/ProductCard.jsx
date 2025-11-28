@@ -9,6 +9,12 @@ export default function ProductCard({ product }) {
     const { addToCart } = useCart();
     const navigation = useNavigation();
 
+    const handleBuyNow = (e) => {
+        e.stopPropagation(); // Evitar que abra el detalle del producto
+        addToCart(productData);
+        navigation.navigate('Checkout');
+    };
+
     // Adaptar campos de la API
     const productData = {
         id: product._id || product.id,
@@ -34,11 +40,17 @@ export default function ProductCard({ product }) {
                 <Text style={{ marginTop: 4, fontWeight: '700', color: colors.text }}>$ {productData.price.toFixed(2)}</Text>
             </View>
             <View style={{ flexDirection: 'row', marginTop: 10 }}>
-                <TouchableOpacity style={{ flex: 1, backgroundColor: colors.primary, paddingVertical: 8, borderRadius: 8, marginRight: 8 }}>
+                <TouchableOpacity 
+                    onPress={handleBuyNow}
+                    style={{ flex: 1, backgroundColor: colors.primary, paddingVertical: 8, borderRadius: 8, marginRight: 8 }}
+                >
                     <Text style={{ textAlign: 'center', color: '#fff', fontWeight: '700' }}>Buy Now</Text>
                 </TouchableOpacity>
                 <TouchableOpacity
-                    onPress={() => addToCart(productData)}
+                    onPress={(e) => {
+                        e.stopPropagation();
+                        addToCart(productData);
+                    }}
                     style={{ flex: 1, backgroundColor: '#E9F6F1', paddingVertical: 8, borderRadius: 8 }}
                 >
                     <Text style={{ textAlign: 'center', color: colors.primary, fontWeight: '700' }}>Add to Cart</Text>
