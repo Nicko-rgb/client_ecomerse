@@ -9,6 +9,7 @@ import {
   Image,
 } from 'react-native';
 import { colors } from '../../../theme/colors';
+import Header from '../../../components/Header';
 
 const OrderDetailsScreen = ({ navigation, route }) => {
   const { order } = route.params;
@@ -68,6 +69,7 @@ const OrderDetailsScreen = ({ navigation, route }) => {
 
   return (
     <ScrollView style={styles.container}>
+      <Header title="Detalles del Pedido" onBack={() => navigation.goBack()} />
       {/* Header del pedido */}
       <View style={styles.orderHeader}>
         <View style={styles.orderHeaderTop}>

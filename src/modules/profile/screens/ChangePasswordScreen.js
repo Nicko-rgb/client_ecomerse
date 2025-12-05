@@ -13,6 +13,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import API_CONFIG from '../../../config/api';
 import { useAuth } from '../../../context/AuthContext';
 import { colors } from '../../../theme/colors';
+import Header from '../../../components/Header';
 
 const ChangePasswordScreen = ({ navigation }) => {
   const { logout } = useAuth();
@@ -139,6 +140,7 @@ const ChangePasswordScreen = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container}>
+      <Header title="Cambiar Contraseña" onBack={() => navigation.goBack()} />
       <View style={styles.form}>
         <Text style={styles.title}>Cambiar Contraseña</Text>
         <Text style={styles.subtitle}>

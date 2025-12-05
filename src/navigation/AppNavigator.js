@@ -161,7 +161,7 @@ export default function AppNavigator() {
       <Stack.Screen
         name="Checkout"
         component={CheckoutScreen}
-        options={{ title: 'Finalizar Compra' }}
+        options={{ title: 'Finalizar Compra', headerShown: false }}
       />
       <Stack.Screen
         name="OrderConfirmation"
@@ -173,74 +173,79 @@ export default function AppNavigator() {
         component={ImageViewer}
         options={{ headerShown: false }}
       />
+      <Stack.Screen
+        name="Producto"
+        component={Producto}
+        options={{ headerShown: false }}
+      />
 
       {/* Pantallas del módulo Profile */}
       <Stack.Screen
         name="EditProfile"
         component={EditProfileScreen}
-        options={{ title: 'Editar Perfil' }}
+        options={{ title: 'Editar Perfil', headerShown: false }}
       />
       <Stack.Screen
         name="AddressesScreen"
         component={AddressesScreen}
-        options={{ title: 'Mis Direcciones' }}
+        options={{ title: 'Mis Direcciones', headerShown: false }}
       />
       <Stack.Screen
         name="AddAddressScreen"
         component={AddAddressScreen}
-        options={{ title: 'Agregar Dirección' }}
+        options={{ title: 'Agregar Dirección', headerShown: false }}
       />
       <Stack.Screen
         name="PaymentMethodsScreen"
         component={PaymentMethodsScreen}
-        options={{ title: 'Métodos de Pago' }}
+        options={{ title: 'Métodos de Pago', headerShown: false }}
       />
       <Stack.Screen
         name="OrderHistoryScreen"
         component={OrderHistoryScreen}
-        options={{ title: 'Mis Pedidos' }}
+        options={{ title: 'Mis Pedidos', headerShown: false }}
       />
       <Stack.Screen
         name="SettingsScreen"
         component={SettingsScreen}
-        options={{ title: 'Configuración' }}
+        options={{ title: 'Configuración', headerShown: false }}
       />
       <Stack.Screen
         name="HelpScreen"
         component={HelpScreen}
-        options={{ title: 'Ayuda y Soporte' }}
+        options={{ title: 'Ayuda y Soporte', headerShown: false }}
       />
       <Stack.Screen
         name="TermsScreen"
         component={TermsScreen}
-        options={{ title: 'Términos y Condiciones' }}
+        options={{ title: 'Términos y Condiciones', headerShown: false }}
       />
 
       {/* Pantallas adicionales del perfil */}
       <Stack.Screen
         name="EditAddressScreen"
         component={EditAddressScreen}
-        options={{ title: 'Editar Dirección' }}
+        options={{ title: 'Editar Dirección', headerShown: false }}
       />
       <Stack.Screen
         name="AddPaymentMethodScreen"
         component={AddPaymentMethodScreen}
-        options={{ title: 'Agregar Método de Pago' }}
+        options={{ title: 'Agregar Método de Pago', headerShown: false }}
       />
       <Stack.Screen
         name="EditPaymentMethodScreen"
         component={EditPaymentMethodScreen}
-        options={{ title: 'Editar Método de Pago' }}
+        options={{ title: 'Editar Método de Pago', headerShown: false }}
       />
       <Stack.Screen
         name="OrderDetailsScreen"
         component={OrderDetailsScreen}
-        options={{ title: 'Detalles del Pedido' }}
+        options={{ title: 'Detalles del Pedido', headerShown: false }}
       />
       <Stack.Screen
         name="ChangePasswordScreen"
         component={ChangePasswordScreen}
-        options={{ title: 'Cambiar Contraseña' }}
+        options={{ title: 'Cambiar Contraseña', headerShown: false }}
       />
 
       {/* Pantallas del módulo Admin */}
@@ -294,14 +299,14 @@ export default function AppNavigator() {
       <Stack.Screen
         name="RegisterScreen"
         component={RegisterScreen}
-        options={{ title: 'Crear Cuenta' }}
+        options={{ title: 'Crear Cuenta', headerShown: false }}
       />
 
       {/* Pantalla de Privacidad */}
       <Stack.Screen
         name="PrivacySettingsScreen"
         component={require('../modules/profile/screens/PrivacySettingsScreen').default}
-        options={{ title: 'Privacidad y Datos' }}
+        options={{ title: 'Privacidad y Datos', headerShown: false }}
       />
     </Stack.Navigator>
   );

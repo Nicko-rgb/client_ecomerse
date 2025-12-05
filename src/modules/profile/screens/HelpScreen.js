@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import ProfileMenuItem from '../components/ProfileMenuItem';
 import { colors } from '../../../theme/colors';
+import Header from '../../../components/Header';
 
 const FAQItem = ({ question, answer, isExpanded, onToggle }) => (
   <View style={styles.faqItem}>
@@ -96,10 +97,7 @@ const HelpScreen = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Ayuda y Soporte</Text>
-        <Text style={styles.subtitle}>Estamos aquí para ayudarte</Text>
-      </View>
+      <Header title="Ayuda y Soporte" onBack={() => navigation.goBack()} />
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Contacto Rápido</Text>
@@ -193,36 +191,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
-  },
-  header: {
-    padding: 20,
-    backgroundColor: colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.dark,
-    marginBottom: 4,
-  },
-  subtitle: {
-    fontSize: 14,
-    color: colors.gray,
+    paddingHorizontal: 10
   },
   section: {
-    marginTop: 24,
+    marginTop: 0,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: colors.dark,
-    marginBottom: 12,
-    paddingHorizontal: 20,
+    marginBottom: 8,
+    marginTop: 8,
+    paddingHorizontal: 5,
   },
   contactContainer: {
     flexDirection: 'row',
-    paddingHorizontal: 16,
     gap: 12,
   },
   contactButton: {
@@ -247,7 +230,6 @@ const styles = StyleSheet.create({
   faqContainer: {
     backgroundColor: colors.white,
     borderRadius: 12,
-    marginHorizontal: 16,
     overflow: 'hidden',
   },
   faqItem: {

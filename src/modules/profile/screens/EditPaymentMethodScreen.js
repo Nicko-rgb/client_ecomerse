@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { colors } from '../../../theme/colors';
+import Header from '../../../components/Header';
 
 const EditPaymentMethodScreen = ({ navigation, route }) => {
   const { paymentMethod } = route.params;
@@ -101,6 +102,7 @@ const EditPaymentMethodScreen = ({ navigation, route }) => {
 
   return (
     <ScrollView style={styles.container}>
+      <Header title="Editar Método de Pago" onBack={() => navigation.goBack()} />
       <View style={styles.form}>
         <Text style={styles.title}>Editar Método de Pago</Text>
         

@@ -9,6 +9,7 @@ import {
   Alert,
 } from 'react-native';
 import { colors } from '../../../theme/colors';
+import Header from '../../../components/Header';
 
 const PrivacySettingsScreen = ({ navigation }) => {
   const [settings, setSettings] = useState({
@@ -125,8 +126,8 @@ const PrivacySettingsScreen = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container}>
+      <Header title="Privacidad y Datos" onBack={() => navigation.goBack()} />
       <View style={styles.header}>
-        <Text style={styles.title}>Privacidad y Datos</Text>
         <Text style={styles.subtitle}>
           Controla cómo se usa tu información personal
         </Text>

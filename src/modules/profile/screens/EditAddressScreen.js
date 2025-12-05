@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { colors } from '../../../theme/colors';
+import Header from '../../../components/Header';
 
 const EditAddressScreen = ({ navigation, route }) => {
   const { address } = route.params;
@@ -83,6 +84,7 @@ const EditAddressScreen = ({ navigation, route }) => {
 
   return (
     <ScrollView style={styles.container}>
+      <Header title="Editar Dirección" onBack={() => navigation.goBack()} />
       <View style={styles.form}>
         <Text style={styles.title}>Editar Dirección</Text>
         
