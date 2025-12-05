@@ -12,6 +12,7 @@ import {
 import { useProfile } from '../hooks/useProfile';
 import { useAuth } from '../../../context/AuthContext';
 import { colors } from '../../../theme/colors';
+import Header from '../../../components/Header';
 
 const EditProfileScreen = ({ navigation, route }) => {
   const { profile, updateProfile, loading } = useProfile();
@@ -80,7 +81,8 @@ const EditProfileScreen = ({ navigation, route }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.form}>
+      <Header title="Editar Perfil" onBack={() => navigation.goBack()} />
+      <View>
         <Text style={styles.title}>Editar Perfil</Text>
         
         <View style={styles.inputGroup}>
@@ -192,9 +194,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
-  },
-  form: {
-    padding: 20,
+    paddingHorizontal: 10,
   },
   title: {
     fontSize: 24,

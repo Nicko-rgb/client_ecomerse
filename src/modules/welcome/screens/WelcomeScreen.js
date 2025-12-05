@@ -11,7 +11,7 @@ export default function WelcomeScreen({ navigation }) {
   useEffect(() => {
     if (trackWidth > 0) {
       progress.setValue(0);
-      Animated.timing(progress, { toValue: trackWidth, duration: 10000, useNativeDriver: false }).start(() => {
+      Animated.timing(progress, { toValue: trackWidth, duration: 2000, useNativeDriver: false }).start(() => {
         navigation.replace('MainTabs');
       });
     }

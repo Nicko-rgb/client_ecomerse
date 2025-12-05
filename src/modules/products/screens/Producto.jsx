@@ -91,12 +91,13 @@ export default function Producto({ route, navigation }) {
                 <TouchableOpacity
                     ref={(ref) => { if (ref) addBtnRef.current = ref; }}
                     style={[styles.btn, styles.btnOutline]}
+                    activeOpacity={.7}
                     onPress={() => {
                         if (addBtnRef.current && addBtnRef.current.measureInWindow) {
                             addBtnRef.current.measureInWindow((x, y, w, h) => {
                                 if (global.__startCartFly__) global.__startCartFly__(x + w / 2, y + h / 2);
                             });
-                        }
+                        }                                                                                                                                                                                                                                                              
                         const cartItem = {
                             id: current.id,
                             title: current.name || current.title,
@@ -112,7 +113,7 @@ export default function Producto({ route, navigation }) {
                 >
                     <Text style={[styles.btnText, { color: colors.primary }]}>Añadir a Carrito</Text>
                 </TouchableOpacity>
-                <TouchableOpacity style={[styles.btn, styles.btnFill]} onPress={handleBuyNow}>
+                <TouchableOpacity activeOpacity={.7} style={[styles.btn, styles.btnFill]} onPress={handleBuyNow}>
                     <Text style={[styles.btnText, { color: '#fff' }]}>Comprar</Text>
                 </TouchableOpacity>
             </View>
@@ -126,8 +127,8 @@ export default function Producto({ route, navigation }) {
                     <Text style={styles.similaresTitle}>Características</Text>
                     {current.features.map((f, idx) => (
                         <View key={`feat-${idx}`} style={{ flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 3 }}>
-                            <Text style={{ color: colors.gray, fontFamily: fontNames.spartanRegular }}>{f.name}</Text>
-                            <Text style={{ fontFamily: fontNames.spartanBold }}>{f.value}</Text>
+                            <Text style={{ fontSize: 16, color: colors.gray, fontFamily: fontNames.spartanRegular }}>{f.name}</Text>
+                            <Text style={{ fontSize: 16, fontFamily: fontNames.spartanBold }}>{f.value}</Text>
                         </View>)
                     )}
                 </View>

@@ -8,8 +8,9 @@ import {
   RefreshControl,
   ActivityIndicator,
 } from 'react-native';
-import { useOrders } from '../../../hooks/useOrders';
+import { useOrders } from '../../cart/hooks/useOrders';
 import { colors } from '../../../theme/colors';
+import Header from '../../../components/Header';
 
 const OrderCard = ({ order, onViewDetails }) => {
   const getStatusColor = (status) => {
@@ -112,9 +113,7 @@ const OrderHistoryScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Historial de Pedidos</Text>
-      </View>
+      <Header title="Mis Pedidos" onBack={() => navigation.goBack()} />
 
       <ScrollView 
         style={styles.scrollView}
@@ -156,21 +155,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
-  },
-  header: {
-    padding: 20,
-    backgroundColor: colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.dark,
+    paddingHorizontal: 10
   },
   scrollView: {
     flex: 1,
-    padding: 16,
   },
   orderCard: {
     backgroundColor: colors.white,

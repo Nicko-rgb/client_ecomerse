@@ -6,12 +6,13 @@ import {
   StyleSheet,
 } from 'react-native';
 import { colors } from '../../../theme/colors';
+import Header from '../../../components/Header';
 
 const TermsScreen = () => {
   return (
     <ScrollView style={styles.container}>
+      <Header title="Términos y Condiciones" onBack={() => navigation.goBack()} />
       <View style={styles.header}>
-        <Text style={styles.title}>Términos y Condiciones</Text>
         <Text style={styles.lastUpdated}>Última actualización: 1 de enero de 2024</Text>
       </View>
 
@@ -123,9 +124,10 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
+    paddingHorizontal: 10,
   },
   header: {
-    padding: 20,
+    padding: 12,
     backgroundColor: colors.white,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
@@ -141,7 +143,8 @@ const styles = StyleSheet.create({
     color: colors.gray,
   },
   content: {
-    padding: 20,
+    padding: 0,
+    marginTop: 10
   },
   section: {
     marginBottom: 24,

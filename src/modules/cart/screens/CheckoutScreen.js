@@ -10,15 +10,20 @@ import {
   Platform,
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import ModalMessage from '../../../components/ModalMessage';
 import { useCart } from '../../../context/CartContext';
 import { useAuth } from '../../../context/AuthContext';
 import OrderSummaryExpandable from '../components/OrderSummaryExpandable';
+import { useCreateOrder } from '../hooks/useCreateOrder';
 import { checkoutStyles } from '../styles/checkoutStyles';
 import colors from '../../../theme/colors';
+import { useProfile } from '../../profile/hooks/useProfile';
 
 export default function CheckoutScreen({ navigation }) {
   const { items, getSubtotal, clearCart } = useCart();
   const { user } = useAuth();
+  const { createOrder } = useCreateOrder();
+  const { profile, addresses } = useProfile();
   
   const [selectedPayment, setSelectedPayment] = useState('card');
   const [cardNumber, setCardNumber] = useState('');
@@ -35,6 +40,14 @@ export default function CheckoutScreen({ navigation }) {
   });
   
   const [deliveryNotes, setDeliveryNotes] = useState('');
+  const [msgVisible, setMsgVisible] = useState(false);
+  const [msgType, setMsgType] = useState('info');
+  const [msgTitle, setMsgTitle] = useState('');
+  const [msgText, setMsgText] = useState('');
+  const [msgPrimaryLabel, setMsgPrimaryLabel] = useState(undefined);
+  const [msgSecondaryLabel, setMsgSecondaryLabel] = useState(undefined);
+  const [msgPrimary, setMsgPrimary] = useState(undefined);
+  const [msgSecondary, setMsgSecondary] = useState(undefined);
 
   // Autocompletar datos del usuario al cargar
   useEffect(() => {
@@ -52,6 +65,20 @@ export default function CheckoutScreen({ navigation }) {
       }
     }
   }, [user]);
+
+  useEffect(() => {
+    const next = {
+      address: (profile && profile.address) || shippingAddress.address,
+      city: (profile && profile.city) || shippingAddress.city,
+      zipCode: (profile && profile.postalCode) || shippingAddress.zipCode,
+    };
+    if ((!next.address || !next.address.trim()) && Array.isArray(addresses) && addresses.length) {
+      const primary = addresses.find(a => a.isPrimary) || addresses[addresses.length - 1];
+      const addrText = (primary && (primary.fullAddress || primary.address)) || '';
+      next.address = addrText || next.address;
+    }
+    setShippingAddress(prev => ({ ...prev, ...next }));
+  }, [profile, addresses]);
 
   const subtotal = getSubtotal();
   const shipping = 5.00;
@@ -76,17 +103,38 @@ export default function CheckoutScreen({ navigation }) {
     if (!shippingAddress.fullName || !shippingAddress.phone || 
         !shippingAddress.address || !shippingAddress.city || 
         !shippingAddress.zipCode) {
-      Alert.alert('Error', 'Por favor completa todos los campos de envío');
+      setMsgType('error');
+      setMsgTitle('Datos de envío');
+      setMsgText('Por favor completa todos los campos de envío');
+      setMsgPrimaryLabel('Entendido');
+      setMsgSecondaryLabel(undefined);
+      setMsgPrimary(() => () => setMsgVisible(false));
+      setMsgSecondary(undefined);
+      setMsgVisible(true);
       return false;
     }
 
     if (selectedPayment === 'card') {
       if (!cardNumber || !cardName || !expiryDate || !cvv) {
-        Alert.alert('Error', 'Por favor completa todos los datos de la tarjeta');
+        setMsgType('error');
+        setMsgTitle('Método de pago');
+        setMsgText('Por favor completa todos los datos de la tarjeta');
+        setMsgPrimaryLabel('Entendido');
+        setMsgSecondaryLabel(undefined);
+        setMsgPrimary(() => () => setMsgVisible(false));
+        setMsgSecondary(undefined);
+        setMsgVisible(true);
         return false;
       }
       if (cardNumber.replace(/\s/g, '').length < 16) {
-        Alert.alert('Error', 'Número de tarjeta inválido');
+        setMsgType('error');
+        setMsgTitle('Número de tarjeta');
+        setMsgText('Número de tarjeta inválido');
+        setMsgPrimaryLabel('Entendido');
+        setMsgSecondaryLabel(undefined);
+        setMsgPrimary(() => () => setMsgVisible(false));
+        setMsgSecondary(undefined);
+        setMsgVisible(true);
         return false;
       }
     }
@@ -129,104 +177,43 @@ export default function CheckoutScreen({ navigation }) {
     });
   };
 
-  const handleCardPayment = () => {
-    Alert.alert(
-      'Procesando Pago',
-      'Verificando datos de la tarjeta...',
-      [],
-      { cancelable: false }
-    );
-
-    setTimeout(() => {
-      Alert.alert(
-        '¡Pago Exitoso!',
-        `Tu tarjeta terminada en ${cardNumber.slice(-4)} ha sido cargada exitosamente.\n\nMonto: $${total.toFixed(2)}`,
-        [
-          {
-            text: 'Ver Detalles',
-            onPress: () => navigateToConfirmation('card')
-          }
-        ]
-      );
-    }, 1500);
-  };
-
-  const handlePayPalPayment = () => {
-    Alert.alert(
-      'Redirigiendo a PayPal',
-      'Serás redirigido a PayPal para completar el pago de forma segura.',
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel'
-        },
-        {
-          text: 'Continuar',
-          onPress: () => {
-            Alert.alert(
-              'Simulación PayPal',
-              'En una app real, aquí se abriría PayPal.\n\n¿Confirmar pago simulado?',
-              [
-                {
-                  text: 'Cancelar',
-                  style: 'cancel'
-                },
-                {
-                  text: 'Pagar',
-                  onPress: () => {
-                    Alert.alert(
-                      '¡Pago Completado!',
-                      `PayPal ha procesado tu pago de $${total.toFixed(2)} exitosamente.`,
-                      [
-                        {
-                          text: 'Ver Detalles',
-                          onPress: () => navigateToConfirmation('paypal')
-                        }
-                      ]
-                    );
-                  }
-                }
-              ]
-            );
-          }
-        }
-      ]
-    );
-  };
-
-  const handleCashPayment = () => {
-    Alert.alert(
-      'Confirmar Pedido',
-      `Pagarás $${total.toFixed(2)} en efectivo al recibir tu pedido.\n\n¿Confirmar pedido?`,
-      [
-        {
-          text: 'Cancelar',
-          style: 'cancel'
-        },
-        {
-          text: 'Confirmar',
-          onPress: () => {
-            Alert.alert(
-              '¡Pedido Confirmado!',
-              'Tu pedido ha sido registrado. Prepara el efectivo para cuando llegue el repartidor.',
-              [
-                {
-                  text: 'Ver Detalles',
-                  onPress: () => navigateToConfirmation('cash')
-                }
-              ]
-            );
-          }
-        }
-      ]
-    );
-  };
-
-  const handlePlaceOrder = () => {
+  const handlePlaceOrder = async () => {
     if (!validateForm()) return;
-    
-    // Navegar directamente a confirmación con el método de pago seleccionado
-    navigateToConfirmation(selectedPayment);
+    const orderItems = items.map((it) => ({
+      product_id: it.id,
+      name: it.name || it.title,
+      quantity: it.quantity || 1,
+      price: it.price,
+      image: it.image
+    }));
+    const orderPayload = {
+      items: orderItems,
+      total,
+      paymentMethod: selectedPayment,
+      paymentDetails: getPaymentDetails(selectedPayment),
+      shippingAddress,
+      notes: deliveryNotes
+    };
+    const result = await createOrder(orderPayload);
+    if (result.success) {
+      clearCart();
+      navigation.replace('OrderConfirmation', {
+        orderNumber: result.data.order?.order_number || result.data.order?.id_order || result.data.id,
+        total,
+        estimatedDelivery: '3-5 días hábiles',
+        paymentMethod: selectedPayment,
+        paymentDetails: getPaymentDetails(selectedPayment)
+      });
+    } else {
+      setMsgType('error');
+      setMsgTitle('Error');
+      setMsgText(result.error || 'No se pudo crear el pedido');
+      setMsgPrimaryLabel('Entendido');
+      setMsgSecondaryLabel(undefined);
+      setMsgPrimary(() => () => setMsgVisible(false));
+      setMsgSecondary(undefined);
+      setMsgVisible(true);
+    }
   };
 
   const oldAlert = () => {
@@ -256,7 +243,7 @@ export default function CheckoutScreen({ navigation }) {
     <View style={checkoutStyles.container}>
       <KeyboardAvoidingView 
         style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 0}
       >
         <ScrollView 
@@ -264,6 +251,14 @@ export default function CheckoutScreen({ navigation }) {
           contentContainerStyle={checkoutStyles.scrollContent}
           keyboardShouldPersistTaps="handled"
         >
+          <View style={checkoutStyles.section}>
+            <View style={checkoutStyles.headerRow}>
+              <TouchableOpacity onPress={() => navigation.goBack()}>
+                <Ionicons name="arrow-back" size={24} color={colors.primary} />
+              </TouchableOpacity>
+              <Text style={checkoutStyles.headerTitle}>Checkout</Text>
+            </View>
+          </View>
           {/* Resumen del pedido expandible */}
           <View style={checkoutStyles.section}>
             <OrderSummaryExpandable
@@ -486,6 +481,17 @@ export default function CheckoutScreen({ navigation }) {
           </Text>
         </TouchableOpacity>
       </View>
+      <ModalMessage
+        visible={msgVisible}
+        type={msgType}
+        title={msgTitle}
+        message={msgText}
+        onClose={() => setMsgVisible(false)}
+        primaryLabel={msgPrimaryLabel}
+        onPrimary={msgPrimary}
+        secondaryLabel={msgSecondaryLabel}
+        onSecondary={msgSecondary}
+      />
     </View>
   );
 }

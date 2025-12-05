@@ -12,6 +12,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useProfile } from '../hooks/useProfile';
 import AddressCard from '../components/AddressCard';
 import { colors } from '../../../theme/colors';
+import Header from '../../../components/Header';
 
 const AddressesScreen = ({ navigation }) => {
   const { addresses, loading, error, refreshAddresses, deleteAddress, updateAddress } = useProfile();
@@ -83,8 +84,8 @@ const AddressesScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Mis Direcciones</Text>
+      <Header title="Mis Direcciones" onBack={() => navigation.goBack()} />
+      <View style={[styles.header, { justifyContent: 'flex-end' }]}>
         <TouchableOpacity 
           style={styles.addButton}
           onPress={handleAddAddress}
@@ -144,15 +145,12 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
+    paddingHorizontal: 10,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
   },
   title: {
     fontSize: 20,

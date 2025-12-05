@@ -1,5 +1,6 @@
 import { StyleSheet } from 'react-native';
 import colors from '../../../theme/colors';
+import { fontNames} from '../../../theme/fonts';
 
 export const cartStyles = StyleSheet.create({
   container: {
@@ -8,23 +9,31 @@ export const cartStyles = StyleSheet.create({
   },
   header: {
     backgroundColor: colors.white,
-    paddingHorizontal: 20,
-    paddingVertical: 16,
+    paddingHorizontal: 10,
+    paddingVertical: 12,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   headerTitle: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: colors.text,
+    fontSize: 20,
+    color: colors.primary,
+    fontFamily: fontNames.playpenExtraBold,
   },
   headerSubtitle: {
-    fontSize: 14,
-    color: colors.muted,
-    marginTop: 4,
+    fontSize: 16,
+    color: colors.primary,
+    fontFamily: fontNames.spartanRegular,
+    backgroundColor: colors.lightBackground,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 8,
+
   },
   listContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 8,
     paddingTop: 16,
     paddingBottom: 16,
   },

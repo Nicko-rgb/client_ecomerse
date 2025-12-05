@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import ProfileMenuItem from '../components/ProfileMenuItem';
 import { colors } from '../../../theme/colors';
+import Header from '../../../components/Header';
 
 const SettingsScreen = ({ navigation }) => {
   const [settings, setSettings] = useState({
@@ -98,9 +99,7 @@ const SettingsScreen = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Configuración</Text>
-      </View>
+      <Header title="Configuración" onBack={() => navigation.goBack()} />
 
       <View style={styles.section}>
         <Text style={styles.sectionTitle}>Notificaciones</Text>
@@ -216,32 +215,21 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
-  },
-  header: {
-    padding: 20,
-    backgroundColor: colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  title: {
-    fontSize: 20,
-    fontWeight: 'bold',
-    color: colors.dark,
+    paddingHorizontal: 10
   },
   section: {
-    marginTop: 24,
+    marginTop: 0,
   },
   sectionTitle: {
     fontSize: 16,
     fontWeight: '600',
     color: colors.dark,
     marginBottom: 8,
-    paddingHorizontal: 20,
+    paddingHorizontal: 5,
   },
   sectionContent: {
     backgroundColor: colors.white,
     borderRadius: 12,
-    marginHorizontal: 16,
     overflow: 'hidden',
   },
   settingItem: {

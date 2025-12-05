@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, Text, FlatList, Alert } from 'react-native';
+import { View, Text, FlatList } from 'react-native';
 import { useCart } from '../../../context/CartContext';
 import { useAuth } from '../../../context/AuthContext';
 import CartItem from '../components/CartItem';
@@ -12,13 +12,16 @@ import DeliveryEstimate from '../components/DeliveryEstimate';
 import PaymentMethods from '../components/PaymentMethods';
 import CartActions from '../components/CartActions';
 import { cartStyles } from '../styles/cartStyles';
+import { Ionicons } from '@expo/vector-icons';
+import colors from '../../../theme/colors';
+import ModalMessage from '../../../components/ModalMessage';
 
 export default function CartScreen({ navigation }) {
   const { isAuthenticated } = useAuth();
-  const { 
-    items, 
-    removeFromCart, 
-    incrementQuantity, 
+  const {
+    items,
+    removeFromCart,
+    incrementQuantity,
     decrementQuantity,
     addToCart,
     clearCart,
@@ -28,6 +31,7 @@ export default function CartScreen({ navigation }) {
 
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [modalVisible, setModalVisible] = useState(false);
+  const [loginModalVisible, setLoginModalVisible] = useState(false);
 
   const subtotal = getSubtotal();
   const totalItems = getTotalItems();
@@ -44,17 +48,7 @@ export default function CartScreen({ navigation }) {
 
   const handleCheckout = () => {
     if (!isAuthenticated) {
-      Alert.alert(
-        'Iniciar Sesión',
-        'Debes iniciar sesión para continuar con la compra',
-        [
-          { text: 'Cancelar', style: 'cancel' },
-          { 
-            text: 'Iniciar Sesión', 
-            onPress: () => navigation.navigate('LoginScreen')
-          }
-        ]
-      );
+      setLoginModalVisible(true);
       return;
     }
 
@@ -88,7 +82,10 @@ export default function CartScreen({ navigation }) {
   return (
     <View style={cartStyles.container}>
       <View style={cartStyles.header}>
-        <Text style={cartStyles.headerTitle}>Mi Carrito</Text>
+        <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+          <Ionicons name="cart" size={24} color={colors.primary} />
+          <Text style={cartStyles.headerTitle}>Mi Carrito</Text>
+        </View>
         <Text style={cartStyles.headerSubtitle}>
           {totalItems} {totalItems === 1 ? 'producto' : 'productos'}
         </Text>
@@ -112,7 +109,7 @@ export default function CartScreen({ navigation }) {
         showsVerticalScrollIndicator={false}
       />
 
-      <CartSummary 
+      <CartSummary
         subtotal={subtotal}
         onCheckout={handleCheckout}
       />
@@ -123,6 +120,21 @@ export default function CartScreen({ navigation }) {
         onClose={handleCloseModal}
         onAddToCart={() => selectedProduct && addToCart(selectedProduct)}
         onRemove={() => selectedProduct && removeFromCart(selectedProduct.id)}
+      />
+
+      <ModalMessage
+        visible={loginModalVisible}
+        type="info"
+        title="Iniciar Sesión"
+        message="Debes iniciar sesión para continuar con la compra"
+        secondaryLabel="Cancelar"
+        onSecondary={() => setLoginModalVisible(false)}
+        primaryLabel="Iniciar Sesión"
+        onPrimary={() => {
+          setLoginModalVisible(false);
+          navigation.navigate('LoginScreen');
+        }}
+        onClose={() => setLoginModalVisible(false)}
       />
     </View>
   );

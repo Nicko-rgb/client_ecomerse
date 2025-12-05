@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import { useProfile } from '../hooks/useProfile';
 import { colors } from '../../../theme/colors';
+import Header from '../../../components/Header';
 
 const AddAddressScreen = ({ navigation }) => {
   const { addAddress, loading } = useProfile();
@@ -70,7 +71,8 @@ const AddAddressScreen = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.form}>
+      <Header title="Agregar Dirección" onBack={() => navigation.goBack()} />
+      <View>
         <Text style={styles.title}>📍 Agregar Dirección</Text>
         <Text style={styles.subtitle}>Agrega tu dirección de forma rápida y sencilla</Text>
         
@@ -189,9 +191,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
-  },
-  form: {
-    padding: 20,
+    paddingHorizontal: 10,
   },
   title: {
     fontSize: 24,

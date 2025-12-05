@@ -11,6 +11,7 @@ import {
 import { useFocusEffect } from '@react-navigation/native';
 import { useProfile } from '../hooks/useProfile';
 import { colors } from '../../../theme/colors';
+import Header from '../../../components/Header';
 
 const PaymentMethodCard = ({ paymentMethod, onEdit, onDelete, onSetPrimary }) => {
   const getCardIcon = (type) => {
@@ -147,8 +148,8 @@ const PaymentMethodsScreen = ({ navigation }) => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.title}>Métodos de Pago</Text>
+      <Header title="Métodos de Pago" onBack={() => navigation.goBack()} />
+      <View style={[styles.header, { justifyContent: 'flex-end' }]}>
         <TouchableOpacity 
           style={styles.addButton}
           onPress={handleAddPaymentMethod}
@@ -208,15 +209,13 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
+    paddingHorizontal: 10
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 20,
-    backgroundColor: colors.white,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
+    marginBottom: 10
   },
   title: {
     fontSize: 20,
@@ -236,7 +235,6 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flex: 1,
-    padding: 16,
   },
   card: {
     backgroundColor: colors.white,

@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, Image, TouchableOpacity, StyleSheet, Alert } from 'react-native';
 import { useAuth } from '../../../context/AuthContext';
 import { colors } from '../../../theme/colors';
+import { fontNames } from '../../../theme/fonts'
 
 const ProfileHeader = ({ profile, onEditPress }) => {
   const { user } = useAuth();
@@ -83,6 +84,7 @@ const ProfileHeader = ({ profile, onEditPress }) => {
 const styles = StyleSheet.create({
   container: {
     flexDirection: 'row',
+    position: 'relative',
     alignItems: 'center',
     padding: 20,
     backgroundColor: colors.white,
@@ -149,25 +151,29 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   name: {
-    fontSize: 20,
-    fontWeight: 'bold',
+    fontSize: 18,
+    fontFamily: fontNames.playpenBold,
     color: colors.dark,
-    marginBottom: 4,
   },
   email: {
     fontSize: 14,
+    lineHeight: 15,
     color: colors.gray,
-    marginBottom: 2,
+    fontFamily: fontNames.playpenRegular,
   },
   memberSince: {
     fontSize: 12,
-    color: colors.lightGray,
+    fontFamily: fontNames.playpenRegular,
+    color: colors.gray,
   },
   editButton: {
     backgroundColor: colors.primary,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
+    position: 'absolute',
+    right: 10,
+    top: 10
   },
   editButtonText: {
     color: colors.white,

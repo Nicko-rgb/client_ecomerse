@@ -10,6 +10,7 @@ import {
 } from 'react-native';
 import { useProfile } from '../hooks/useProfile';
 import { colors } from '../../../theme/colors';
+import Header from '../../../components/Header';
 
 const AddPaymentMethodScreen = ({ navigation }) => {
   const { addPaymentMethod, loading } = useProfile();
@@ -85,7 +86,8 @@ const AddPaymentMethodScreen = ({ navigation }) => {
 
   return (
     <ScrollView style={styles.container}>
-      <View style={styles.form}>
+      <Header title="Agregar Método de Pago" onBack={() => navigation.goBack()} />
+      <View>
         <Text style={styles.title}>💳 Agregar Método de Pago</Text>
         <Text style={styles.subtitle}>Selecciona tu método de pago preferido</Text>
         
@@ -163,9 +165,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: colors.bg,
-  },
-  form: {
-    padding: 20,
+    paddingHorizontal: 10
   },
   title: {
     fontSize: 24,

@@ -6,12 +6,24 @@ export const checkoutStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.bg,
   },
+  headerRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    paddingVertical: 8,
+  },
+  headerTitle: {
+    fontSize: 18,
+    fontWeight: '700',
+    color: colors.primary,
+  },
   scrollContent: {
     flexGrow: 1,
     paddingBottom: 20,
   },
   section: {
-    padding: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 8,
   },
   sectionTitle: {
     fontSize: 18,
